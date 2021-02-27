@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group 'de.moin123'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.javacord:javacord:3.1.2'
+}
+
+test {
+    useJUnitPlatform()
+}

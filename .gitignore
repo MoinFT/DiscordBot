@@ -1,0 +1,5 @@
+# Project exclude paths
+/.gradle/
+/build/
+
+/src/main/java/de/moin123/utils/Privates.java
