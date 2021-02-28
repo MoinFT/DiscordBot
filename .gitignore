@@ -2,4 +2,5 @@
 /.gradle/
 /build/
 
-/src/main/java/de/moin123/utils/Privates.java
+!/src/main/java/de/moinFT/utils/*
+/src/main/java/de/moinFT/utils/Privates.java

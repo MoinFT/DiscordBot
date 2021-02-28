@@ -2,7 +2,7 @@ plugins {
     id 'java'
 }
 
-group 'de.moin123'
+group 'de.moinFT'
 version '1.0-SNAPSHOT'
 
 repositories {
@@ -11,6 +11,7 @@ repositories {
 
 dependencies {
     implementation 'org.javacord:javacord:3.1.2'
+    implementation 'mysql:mysql-connector-java:8.0.11'
 }
 
 test {

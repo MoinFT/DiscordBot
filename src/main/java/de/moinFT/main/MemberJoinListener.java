@@ -1,4 +1,4 @@
-package de.moin123.main;
+package de.moinFT.main;
 
 public class MemberJoinListener {
 }
