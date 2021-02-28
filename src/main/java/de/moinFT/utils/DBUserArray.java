@@ -37,7 +37,7 @@ public class DBUserArray {
     }
 
     public int getID(String UserID){
-        if(this.UserID == UserID){
+        if(this.UserID.equals(UserID)){
             return this.ID;
         } else {
             if (this.follower != null){
@@ -50,7 +50,7 @@ public class DBUserArray {
 
     public int getDB_ID(int ID){
         if(this.ID == ID){
-            return this.ID;
+            return this.DB_ID;
         } else {
             if (this.follower != null){
                 return this.follower.getDB_ID(ID);

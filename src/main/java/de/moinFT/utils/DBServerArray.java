@@ -19,14 +19,14 @@ public class DBServerArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, String ServerID){
-        if(this.free){
+    public void setData(int DB_ID, String ServerID) {
+        if (this.free) {
             this.DB_ID = DB_ID;
             this.ServerID = ServerID;
 
             this.free = false;
         } else {
-            if(this.follower == null){
+            if (this.follower == null) {
                 this.follower = new DBServerArray();
                 this.follower.ID = this.ID + 1;
             }
@@ -35,11 +35,11 @@ public class DBServerArray {
         }
     }
 
-    public DBServerArray getServer(int ID){
-        if(this.ID == ID){
+    public DBServerArray getServer(int ID) {
+        if (this.ID == ID) {
             return this;
         } else {
-            if (this.follower != null){
+            if (this.follower != null) {
                 return this.follower.getServer(ID);
             } else {
                 return null;
@@ -47,11 +47,11 @@ public class DBServerArray {
         }
     }
 
-    public String getServerID(int ID){
-        if(this.ID == ID){
+    public String getServerID(int ID) {
+        if (this.ID == ID) {
             return this.ServerID;
         } else {
-            if (this.follower != null){
+            if (this.follower != null) {
                 return this.follower.getServerID(ID);
             } else {
                 return "";
@@ -59,12 +59,12 @@ public class DBServerArray {
         }
     }
 
-    public DBUserArray getUsers(){
+    public DBUserArray getUsers() {
         return this.users;
     }
 
-    public int count(){
-        if(!this.free){
+    public int count() {
+        if (!this.free) {
             if (this.follower != null) {
                 return 1 + this.follower.count();
             } else {
