@@ -27,14 +27,14 @@ public class DatabaseConnection {
             res = statement.executeQuery("SELECT * FROM `server`");
 
             while (res.next()){
-                DBServer.setData(res.getInt("id"), res.getString("serverID"));
+                DBServer.setData(res.getInt("id"), res.getLong("serverID"));
             }
 
             for(int i = 0; i < DBServer.count(); i++){
                 res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_User`");
 
                 while (res.next()){
-                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getString("userID"), res.getBoolean("botPermission"));
+                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getBoolean("botPermission"));
                 }
             }
 
@@ -42,7 +42,15 @@ public class DatabaseConnection {
                 res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_Role`");
 
                 while (res.next()){
-                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getString("roleID"), res.getString("roleName"), res.getString("roleType"));
+                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
+                }
+            }
+
+            for(int i = 0; i < DBServer.count(); i++){
+                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_Channel`");
+
+                while (res.next()){
+                    DBServer.getServer(i).getChannels().setData(res.getInt("id"), res.getLong("channelID"), res.getString("channelType"), res.getString("channelName"));
                 }
             }
 
@@ -52,7 +60,7 @@ public class DatabaseConnection {
 
         } catch (Exception e){
             System.out.println(e.getMessage());
-            System.out.println("An error occured. Please try again1.");
+            System.out.println("An error occured. Please try again.");
         }
     }
 
@@ -67,6 +75,25 @@ public class DatabaseConnection {
 
             statement.execute("INSERT `" + table + "` " + columns + " VALUES " + values);
 
+            statement.close();
+            con.close();
+
+        } catch (Exception e){
+            System.out.println(e.getMessage());
+            System.out.println("An error occured. Please try again.");
+        }
+    }
+
+    public static void DBUpdateItem(String table, int DB_ID, String columnsAndValues){
+        try{
+            Class.forName("com.mysql.cj.jdbc.Driver").newInstance();
+
+            Connection con = DriverManager.getConnection(Privates.DBConnectionURL, Privates.DBUser, Privates.DBPassword);
+
+            Statement statement = con.createStatement();
+            statement.execute("USE " + database);
+
+            statement.execute("UPDATE `" + table + "` SET " + columnsAndValues + " WHERE `id`= " + DB_ID);
             statement.close();
             con.close();
 

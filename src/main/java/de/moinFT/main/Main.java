@@ -5,10 +5,12 @@ import de.moinFT.utils.Privates;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
+import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.user.User;
 
+import java.nio.channels.Channel;
 import java.util.Iterator;
 
 public class Main{
@@ -21,7 +23,7 @@ public class Main{
 
         DiscordApi client = new DiscordApiBuilder()
                 .setToken(Privates.botToken)
-                .setIntents(Intent.GUILDS, Intent.GUILD_MEMBERS, Intent.DIRECT_MESSAGES)
+                .setIntents(Intent.GUILDS, Intent.GUILD_MESSAGES, Intent.GUILD_MEMBERS, Intent.DIRECT_MESSAGES)
                 .login()
                 .join();
 
@@ -33,6 +35,7 @@ public class Main{
         for(int i = 0; i < DBServer.count(); i++) {
             compareDBUser_WithGuildUser(client, i);
             compareDBRole_WithGuildRole(client, i);
+            compareDBChannel_WithGuildChannel(client, i);
         }
 
         client.addMessageCreateListener(new MessageListener());
@@ -46,13 +49,13 @@ public class Main{
 
         if(userCount > DBUserCount){
             while (users.hasNext()){
-                String userID = "" + users.next().getId();
+                long userID = users.next().getId();
 
-                boolean existUserDB = DBServer.getServer(i).getUsers().getID(userID) == -1;
+                boolean existUserDB = DBServer.getServer(i).getUsers().getID(userID) > -1;
 
-                if(existUserDB){
+                if(!existUserDB){
                     System.out.println("Add User to DB: " + userID);
-                    if(userID.equals("588347358677565470") || userID.equals("" + client.getServerById(DBServer.getServerID(i)).get().getOwnerId())){
+                    if(userID == Privates.MyUserID || userID == client.getServerById(DBServer.getServerID(i)).get().getOwnerId()){
                         DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_User", "(`userID`, `botPermission`)", "('" + userID + "', 'true')");
                     } else {
                         DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_User", "(`userID`, `botPermission`)", "('" + userID + "', 'false')");
@@ -81,9 +84,9 @@ public class Main{
             while (roles.hasNext()){
                 Role role = roles.next();
 
-                boolean existRoleDB = DBServer.getServer(i).getUsers().getID("" + role.getId()) == -1;
+                boolean existRoleDB = DBServer.getServer(i).getRoles().getID(role.getId()) > -1;
 
-                if(existRoleDB) {
+                if(!existRoleDB) {
                     System.out.println("Add Role to DB: " + role.getId());
                     if (role.isEveryoneRole()) {
                         DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_Role", "(`roleID`, `roleName`, `roleType`)", "('" + role.getId() + "', 'everyone', 'everyone')");
@@ -95,10 +98,48 @@ public class Main{
         } else if(roleCount < DBRoleCount){
             for(int i_Role = 0; i_Role < DBRoleCount; i_Role++) {
                 try {
-                    System.out.println(client.getServerById(DBServer.getServerID(i)).get().getMemberById(DBServer.getServer(i).getUsers().getUserID(i_Role)).get());
+                    System.out.println(client.getServerById(DBServer.getServerID(i)).get().getMemberById(DBServer.getServer(i).getRoles().getRoleID(i_Role)).get());
                 } catch (Exception e) {
-                    System.out.println("Remove Role from DB: " + DBServer.getServer(i).getUsers().getDB_ID(i_Role));
-                    DatabaseConnection.DBDeleteItem(DBServer.getServerID(i) + "_Role", DBServer.getServer(i).getUsers().getDB_ID(i_Role));
+                    System.out.println("Remove Role from DB: " + DBServer.getServer(i).getRoles().getDB_ID(i_Role));
+                    DatabaseConnection.DBDeleteItem(DBServer.getServerID(i) + "_Role", DBServer.getServer(i).getRoles().getDB_ID(i_Role));
+                }
+            }
+        }
+    }
+
+    private static void compareDBChannel_WithGuildChannel(DiscordApi client, int i){
+        int channelCount = client.getServerById(DBServer.getServerID(i)).get().getChannels().size();
+        int DBChannelCount = DBServer.getServer(i).getChannels().count();
+
+        Iterator<ServerChannel> channels = client.getServerById(DBServer.getServerID(i)).get().getChannels().iterator();
+
+        if(channelCount > DBChannelCount){
+            while (channels.hasNext()){
+                ServerChannel channel = channels.next();
+
+                boolean existChannelDB = DBServer.getServer(i).getChannels().getID(channel.getId()) > -1;
+
+                if(!existChannelDB) {
+                    if(channel.getType().isTextChannelType()) {
+                        System.out.println("Add Channel to DB: " + channel.getId());
+                        DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_Channel", "(`channelID`, `channelType`, `channelName`)", "('" + channel.getId() + "', 'textChannel', '')");
+                    } else if(channel.getType().isVoiceChannelType()) {
+                        System.out.println("Add Channel to DB: " + channel.getId());
+                        if (client.getServerById(DBServer.getServerID(i)).get().getAfkChannel().get().getId() == channel.getId()) {
+                            DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_Channel", "(`channelID`, `channelType`, `channelName`)", "('" + channel.getId() + "', 'voiceChannel', 'afk')");
+                        } else {
+                            DatabaseConnection.DBAddItem(DBServer.getServerID(i) + "_Channel", "(`channelID`, `channelType`, `channelName`)", "('" + channel.getId() + "', 'voiceChannel', '')");
+                        }
+                    }
+                }
+            }
+        } else if(channelCount < DBChannelCount){
+            for(int i_Role = 0; i_Role < DBChannelCount; i_Role++) {
+                try {
+                    System.out.println(client.getServerById(DBServer.getServerID(i)).get().getChannelById(DBServer.getServer(i).getChannels().getChannelID(i_Role)).get());
+                } catch (Exception e) {
+                    System.out.println("Remove Channel from DB: " + DBServer.getServer(i).getChannels().getDB_ID(i_Role));
+                    DatabaseConnection.DBDeleteItem(DBServer.getServerID(i) + "_Channel", DBServer.getServer(i).getChannels().getDB_ID(i_Role));
                 }
             }
         }

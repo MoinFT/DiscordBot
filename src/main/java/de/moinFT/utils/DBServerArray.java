@@ -3,9 +3,10 @@ package de.moinFT.utils;
 public class DBServerArray {
     private int ID;
     private int DB_ID;
-    private String ServerID;
+    private long ServerID;
     private DBUserArray Users;
     private DBRoleArray Roles;
+    private DBChannelArray Channels;
 
     private boolean free;
     private DBServerArray follower;
@@ -13,15 +14,16 @@ public class DBServerArray {
     public DBServerArray() {
         this.ID = 0;
         this.DB_ID = 0;
-        this.ServerID = "";
+        this.ServerID = 0;
         this.Users = new DBUserArray();
         this.Roles = new DBRoleArray();
+        this.Channels = new DBChannelArray();
 
         this.free = true;
         this.follower = null;
     }
 
-    public void setData(int DB_ID, String ServerID) {
+    public void setData(int DB_ID, long ServerID) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.ServerID = ServerID;
@@ -49,8 +51,8 @@ public class DBServerArray {
         }
     }
 
-    public DBServerArray getServer(String ServerID) {
-        if (this.ServerID.equals(ServerID)) {
+    public DBServerArray getServer(long ServerID) {
+        if (this.ServerID == ServerID) {
             return this;
         } else {
             if (this.follower != null) {
@@ -61,14 +63,14 @@ public class DBServerArray {
         }
     }
 
-    public String getServerID(int ID) {
+    public long getServerID(int ID) {
         if (this.ID == ID) {
             return this.ServerID;
         } else {
             if (this.follower != null) {
                 return this.follower.getServerID(ID);
             } else {
-                return "";
+                return 0;
             }
         }
     }
@@ -79,6 +81,10 @@ public class DBServerArray {
 
     public DBRoleArray getRoles() {
         return this.Roles;
+    }
+
+    public DBChannelArray getChannels() {
+        return this.Channels;
     }
 
     public int count() {

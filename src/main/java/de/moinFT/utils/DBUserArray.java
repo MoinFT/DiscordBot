@@ -3,7 +3,7 @@ package de.moinFT.utils;
 public class DBUserArray {
     private int ID;
     private int DB_ID;
-    private String UserID;
+    private long UserID;
     private boolean BotPermission;
 
     private boolean free;
@@ -12,14 +12,14 @@ public class DBUserArray {
     public DBUserArray() {
         this.ID = 0;
         this.DB_ID = 0;
-        this.UserID = "";
+        this.UserID = 0;
         this.BotPermission = false;
 
         this.free = true;
         this.follower = null;
     }
 
-    public void setData(int DB_ID, String UserID, boolean botPermission){
+    public void setData(int DB_ID, long UserID, boolean botPermission){
         if (this.free){
             this.DB_ID = DB_ID;
             this.UserID = UserID;
@@ -36,8 +36,8 @@ public class DBUserArray {
         }
     }
 
-    public int getID(String UserID){
-        if(this.UserID.equals(UserID)){
+    public int getID(long UserID){
+        if(this.UserID == UserID){
             return this.ID;
         } else {
             if (this.follower != null){
@@ -60,14 +60,14 @@ public class DBUserArray {
         }
     }
 
-    public String getUserID(int ID){
+    public long getUserID(int ID){
         if(this.ID == ID){
             return this.UserID;
         } else {
             if (this.follower != null){
                 return this.follower.getUserID(ID);
             } else {
-                return "";
+                return 0;
             }
         }
     }

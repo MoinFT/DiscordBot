@@ -3,7 +3,7 @@ package de.moinFT.utils;
 public class DBRoleArray {
     private int ID;
     private int DB_ID;
-    private String roleID;
+    private long roleID;
     private String roleName;
     private String roleType;
 
@@ -13,7 +13,7 @@ public class DBRoleArray {
     public DBRoleArray() {
         this.ID = 0;
         this.DB_ID = 0;
-        this.roleID = "";
+        this.roleID = 0;
         this.roleName = "";
         this.roleType = "";
 
@@ -21,7 +21,7 @@ public class DBRoleArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, String roleID, String roleType, String roleName){
+    public void setData(int DB_ID, long roleID, String roleType, String roleName){
         if (this.free){
             this.DB_ID = DB_ID;
             this.roleID = roleID;
@@ -39,14 +39,70 @@ public class DBRoleArray {
         }
     }
 
-    public String getRoleID(int ID){
+    public void updateRoleType(long roleID, String roleType){
+        if(this.roleID == roleID){
+            this.roleType = roleType;
+        } else {
+            if (this.follower != null){
+                this.follower.updateRoleType(roleID, roleType);
+            }
+        }
+    }
+
+    public void updateRoleName(long roleID, String roleName){
+        if(this.roleID == roleID){
+            this.roleType = roleName;
+        } else {
+            if (this.follower != null){
+                this.follower.updateRoleType(roleID, roleName);
+            }
+        }
+    }
+
+    public int getID(long roleID){
+        if(this.roleID == roleID){
+            return this.ID;
+        } else {
+            if (this.follower != null){
+                return this.follower.getID(roleID);
+            } else {
+                return -1;
+            }
+        }
+    }
+
+    public int getDB_ID(int ID){
+        if (this.ID == ID){
+            return this.DB_ID;
+        } else {
+            if (this.follower != null){
+                return this.follower.getDB_ID(ID);
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public int getDB_ID(long roleID){
+        if (this.roleID == roleID){
+            return this.DB_ID;
+        } else {
+            if (this.follower != null){
+                return this.follower.getDB_ID(roleID);
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public long getRoleID(int ID){
         if (this.ID == ID){
             return this.roleID;
         } else {
             if (this.follower != null){
                 return this.follower.getRoleID(ID);
             } else {
-                return "";
+                return 0;
             }
         }
     }
