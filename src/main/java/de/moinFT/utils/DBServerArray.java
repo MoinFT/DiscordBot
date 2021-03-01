@@ -4,7 +4,8 @@ public class DBServerArray {
     private int ID;
     private int DB_ID;
     private String ServerID;
-    private DBUserArray users;
+    private DBUserArray Users;
+    private DBRoleArray Roles;
 
     private boolean free;
     private DBServerArray follower;
@@ -13,7 +14,8 @@ public class DBServerArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.ServerID = "";
-        this.users = new DBUserArray();
+        this.Users = new DBUserArray();
+        this.Roles = new DBRoleArray();
 
         this.free = true;
         this.follower = null;
@@ -47,6 +49,18 @@ public class DBServerArray {
         }
     }
 
+    public DBServerArray getServer(String ServerID) {
+        if (this.ServerID.equals(ServerID)) {
+            return this;
+        } else {
+            if (this.follower != null) {
+                return this.follower.getServer(ServerID);
+            } else {
+                return null;
+            }
+        }
+    }
+
     public String getServerID(int ID) {
         if (this.ID == ID) {
             return this.ServerID;
@@ -60,7 +74,11 @@ public class DBServerArray {
     }
 
     public DBUserArray getUsers() {
-        return this.users;
+        return this.Users;
+    }
+
+    public DBRoleArray getRoles() {
+        return this.Roles;
     }
 
     public int count() {

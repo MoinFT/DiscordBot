@@ -11,21 +11,24 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
-import java.util.List;
+import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 
+import static de.moinFT.main.Main.DBServer;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 public class MessageListener implements MessageCreateListener {
 
     private Server Server = null;
+    private String ServerID = "";
     private Message Message = null;
     private String MessageContent = "";
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
         Server = event.getServer().get();
+        ServerID = String.valueOf(Server.getId());
         Message = event.getMessage();
         MessageContent = event.getMessageContent().toLowerCase();
 
@@ -95,79 +98,53 @@ public class MessageListener implements MessageCreateListener {
         }
     }
 
-    private void normalCommands(Message message){
-        if(MessageContent.startsWith("!color")){
-            List<Role> userRoles = message.getUserAuthor().get().getRoles(Server);
+    private void normalCommands(Message message) {
+        if (MessageContent.startsWith("!color")) {
+            int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
 
-            for (int i0 = 0; i0 < userRoles.size(); i0++){
-                for (int i1 = 0; i1 < Privates.ColorRoleID.length; i1++){
-                    if(userRoles.get(i0).getId() == Privates.ColorRoleID[i1]){
-                        message.getUserAuthor().get().removeRole(message.getUserAuthor().get().getRoles(Server).get(i0));
+            if (DBRoleCount > 0) {
+                ListIterator<Role> userRoles = message.getUserAuthor().get().getRoles(Server).listIterator();
+
+                while (userRoles.hasNext()) {
+                    for (int i = 0; i < DBRoleCount; i++) {
+                        Role userRole = userRoles.next();
+                        if (String.valueOf(userRole.getId()).equals(DBServer.getServer(ServerID).getRoles().getRoleID(i))) {
+                            message.getUserAuthor().get().removeRole(userRole);
+                        }
                     }
                 }
-            }
 
-            if(MessageContent.length() > 7) {
-                String messValue = MessageContent.substring(7);
-                long roleID = 0;
+                if (MessageContent.length() > 7) {
+                    String messValue = MessageContent.substring(7);
 
-                if (messValue != "") {
-                    switch (messValue) {
-                        case "black":
-                            roleID = parseLong("768212337261543456");
-                            break;
-                        case "cyan":
-                            roleID = parseLong("768217597161373767");
-                            break;
-                        case "purple":
-                            roleID = parseLong("768217670184206367");
-                            break;
-                        case "pink":
-                            roleID = parseLong("768217719967186954");
-                            break;
-                        case "yellow":
-                            roleID = parseLong("768217767169753088");
-                            break;
-                        case "red":
-                            roleID = parseLong("768217813898756138");
-                            break;
-                        case "gray":
-                            roleID = parseLong("768217966247936020");
-                            break;
-                        case "dark-gray":
-                            roleID = parseLong("768218364392243221");
-                            break;
-                        case "dark-blue":
-                            roleID = parseLong("769585641985409024");
-                            break;
-                    }
+                    for (int i = 0; i < DBRoleCount; i++) {
+                        if (DBServer.getServer(ServerID).getRoles().getRoleName(i).equals(messValue) && DBServer.getServer(ServerID).getRoles().getRoleType(i).equals("color")) {
+                            Role role = Server.getRoleById(DBServer.getServer(ServerID).getRoles().getRoleID(i)).get();
 
-                    if(roleID != 0) {
-                        Role role = Server.getRoleById(roleID).get();
-
-                        Message.getUserAuthor().get().addRole(role);
+                            Message.getUserAuthor().get().addRole(role);
+                        }
                     }
                 }
             }
 
             Message.delete();
-        } else if (MessageContent.startsWith("!m-a")){
+        } else if (MessageContent.startsWith("!m-a")) {
             ServerVoiceChannel voiceChannel = Message.getUserAuthor().get().getConnectedVoiceChannel(Server).get();
-            if(voiceChannel != null){
+            if (voiceChannel != null) {
                 Object[] userIDs = voiceChannel.getConnectedUserIds().toArray();
 
-                if(!Server.getMemberById((long) userIDs[0]).get().isMuted(Server)){
-                    for (int i = 0; i < userIDs.length; i++){
+                if (!Server.getMemberById((long) userIDs[0]).get().isMuted(Server)) {
+                    for (int i = 0; i < userIDs.length; i++) {
                         Server.getMemberById((long) userIDs[i]).get().mute(Server);
                     }
                 } else {
-                    for (int i = 0; i < userIDs.length; i++){
+                    for (int i = 0; i < userIDs.length; i++) {
                         Server.getMemberById((long) userIDs[i]).get().unmute(Server);
                     }
                 }
             }
             Message.delete();
-        } else if(MessageContent.startsWith("!help")){
+        } else if (MessageContent.startsWith("!help")) {
             TextChannel textChannel = message.getChannel();
 
             EmbedBuilder embed = new EmbedBuilder()

@@ -38,6 +38,14 @@ public class DatabaseConnection {
                 }
             }
 
+            for(int i = 0; i < DBServer.count(); i++){
+                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_Role`");
+
+                while (res.next()){
+                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getString("roleID"), res.getString("roleName"), res.getString("roleType"));
+                }
+            }
+
             res.close();
             statement.close();
             con.close();

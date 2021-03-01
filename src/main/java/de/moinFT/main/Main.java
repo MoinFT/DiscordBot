@@ -8,7 +8,6 @@ import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.intent.Intent;
 import org.javacord.api.entity.user.User;
 
-import java.awt.desktop.SystemSleepEvent;
 import java.util.Iterator;
 
 public class Main{

@@ -4,7 +4,7 @@ public class DBUserArray {
     private int ID;
     private int DB_ID;
     private String UserID;
-    private boolean botPermission;
+    private boolean BotPermission;
 
     private boolean free;
     private DBUserArray follower;
@@ -13,7 +13,7 @@ public class DBUserArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.UserID = "";
-        this.botPermission = false;
+        this.BotPermission = false;
 
         this.free = true;
         this.follower = null;
@@ -23,7 +23,7 @@ public class DBUserArray {
         if (this.free){
             this.DB_ID = DB_ID;
             this.UserID = UserID;
-            this.botPermission = botPermission;
+            this.BotPermission = botPermission;
 
             this.free = false;
         } else {
