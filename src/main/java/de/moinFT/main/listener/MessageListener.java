@@ -1,6 +1,6 @@
-package de.moinFT.main;
+package de.moinFT.main.listener;
 
-import org.javacord.api.entity.channel.Channel;
+import de.moinFT.main.DatabaseConnection;
 import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.Message;
@@ -25,6 +25,7 @@ public class MessageListener implements MessageCreateListener {
     private long ServerID = 0;
     private Message Message = null;
     private String MessageContent = "";
+    private String Prefix = "";
 
     @Override
     public void onMessageCreate(MessageCreateEvent event) {
@@ -32,18 +33,19 @@ public class MessageListener implements MessageCreateListener {
         ServerID = Server.getId();
         Message = event.getMessage();
         MessageContent = event.getMessageContent().toLowerCase();
+        Prefix = DBServer.getPrefix(ServerID);
 
-        if (event.isServerMessage()) {
-            if (!event.getMessageAuthor().isBotUser()) {
-                if (MessageContent.startsWith("!")) {
+        if (Message.isServerMessage()) {
+            if (!Message.getUserAuthor().get().isBot()) {
+                if (MessageContent.startsWith(Prefix)) {
                     if (event.getMessageAuthor().isServerAdmin()) {
-                        if (MessageContent.startsWith("!clear")) {
+                        if (MessageContent.startsWith(Prefix + "clear")) {
                             int MessValue = 0;
 
                             try {
                                 MessValue = parseInt(MessageContent.substring(7)) + 1;
                             } catch (Exception e) {
-                                event.deleteMessage();
+                                Message.delete();
                             }
 
                             try {
@@ -52,31 +54,31 @@ public class MessageListener implements MessageCreateListener {
                                 System.out.println("Error: Messages couldn't be deleted (check Permissions)!");
                                 e.printStackTrace();
                             }
-                        } else if (MessageContent.startsWith("!add-role")) {
-                            Role addRole = getRole_FromMessage(Message);
-                            User addUser = getUser_FromMessage(Message);
+                        } else if (MessageContent.startsWith(Prefix + "add-role")) {
+                            Role addRole = getFirstRole_FromMessage(Message);
+                            User addUser = getFirstUser_FromMessage(Message);
 
                             if (addRole != null && addUser != null) {
                                 Server.addRoleToUser(addUser, addRole);
                             }
 
-                            event.deleteMessage();
-                        } else if (MessageContent.startsWith("!remove-role")) {
-                            Role removeRole = getRole_FromMessage(Message);
-                            User removeUser = getUser_FromMessage(Message);
+                            Message.delete();
+                        } else if (MessageContent.startsWith(Prefix + "remove-role")) {
+                            Role removeRole = getFirstRole_FromMessage(Message);
+                            User removeUser = getFirstUser_FromMessage(Message);
 
                             if (removeRole != null && removeUser != null) {
                                 Server.removeRoleFromUser(removeUser, removeRole);
                             }
 
-                            event.deleteMessage();
-                        } else if (MessageContent.startsWith("!channel-set")) {
+                            Message.delete();
+                        } else if (MessageContent.startsWith(Prefix + "channel-set")) {
                             long channelID = Message.getMentionedChannels().get(0).asTextChannel().get().getId();
                             String channelName = "";
 
-                            try{
+                            try {
                                 channelName = MessageContent.split(" ")[2];
-                                if (channelName.equals("_")){
+                                if (channelName.equals("_")) {
                                     channelName = "";
                                 }
                             } catch (Exception e) {
@@ -87,23 +89,23 @@ public class MessageListener implements MessageCreateListener {
                             DatabaseConnection.DBUpdateItem(Server.getId() + "_Channel", DBServer.getServer(ServerID).getChannels().getDB_ID(channelID), "`channelName` = '" + channelName + "'");
 
                             Message.delete();
-                        }else if (MessageContent.startsWith("!role-set")) {
+                        } else if (MessageContent.startsWith(Prefix + "role-set")) {
                             long roleID = Message.getMentionedRoles().get(0).getId();
                             String roleType = "";
                             String roleName = "";
 
-                            try{
+                            try {
                                 roleType = MessageContent.split(" ")[2];
-                                if (roleType.equals("_")){
+                                if (roleType.equals("-")) {
                                     roleType = "";
                                 }
                             } catch (Exception e) {
                                 System.out.println("Error: No roleType found in the message!");
                             }
 
-                            try{
+                            try {
                                 roleName = MessageContent.split(" ")[3];
-                                if (roleName.equals("_")){
+                                if (roleName.equals("-")) {
                                     roleName = "";
                                 }
                             } catch (Exception e) {
@@ -116,73 +118,32 @@ public class MessageListener implements MessageCreateListener {
                             DatabaseConnection.DBUpdateItem(Server.getId() + "_Role", DBServer.getServer(ServerID).getRoles().getDB_ID(roleID), "`roleName` = '" + roleName + "'");
 
                             Message.delete();
-                        } else if (MessageContent.startsWith("!help-all")) {
-                            TextChannel textChannel;
-                            int AdminChannelID_Cache = DBServer.getServer(Server.getId()).getChannels().getID("admin");
-                            if (AdminChannelID_Cache > -1) {
-                                long AdminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannelID(AdminChannelID_Cache);
-                                textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
-                            } else {
-                                textChannel = Message.getChannel().asTextChannel().get();
-                            }
-
-                            EmbedBuilder embed = new EmbedBuilder()
-                                    .setTitle("Bot-Befehle")
-                                    .addField("Admin-Befehle (Ohne Bot-Berechtigungen)", "\u200B")
-                                    .addField("!help-all", "Diese Liste")
-                                    .addField("!help-set", "Bot-Befehle (Bot Variablen setzen)")
-                                    .addField("!clear [Wert]", "Loescht [Wert] Nachrichten aus einem TextChannel")
-                                    .addField("\u200B", "\u200B")
-                                    .addField("Admin-Befehle (Mit Bot-Berechtigungen)", "\u200B")
-                                    .addField("!add-role [UserMention] [RoleMention]", "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]")
-                                    .addField("!remove-role [UserMention] [RoleMention]", "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]");
-
-                            textChannel.sendMessage(embed);
-
-                            Message.delete();
-                        } else if (MessageContent.startsWith("!help-set")) {
-                            TextChannel textChannel;
-                            int AdminChannelDB_ID = DBServer.getServer(Server.getId()).getChannels().getDB_ID("admin");
-                            if (AdminChannelDB_ID > -1) {
-                                long AdminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannelID(AdminChannelDB_ID);
-                                textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
-                            } else {
-                                textChannel = Message.getChannel().asTextChannel().get();
-                            }
-
-                            EmbedBuilder embed = new EmbedBuilder()
-                                    .setTitle("Bot-Befehle (Bot Variablen setzen)")
-                                    .addField("!help-set", "Diese Liste")
-                                    .addField("!channel-set [channelMention] [channelName]", "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu. \n Fuer Admin (Beispiel): !channel-set #admin admin")
-                                    .addField("!role-set [roleMention] [roleType] [roleName]", "Fuegt einer Rolle [roleMention] einen Typ [roleType] und \n einen Namen [roleName] hinzu. \n Fuer eine Farbe (Beispiel): !role-set @yellow color yellow");
-
-                            textChannel.sendMessage(embed);
-
-                            Message.delete();
+                        } else if (MessageContent.startsWith(Prefix + "help-all") || MessageContent.startsWith(Prefix + "help-set")) {
+                            getHelpMessage(true);
                         } else {
-                            normalCommands(Message);
+                            normalCommands();
                         }
                     } else {
-                        normalCommands(Message);
+                        normalCommands();
                     }
                 }
             }
         }
     }
 
-    private void normalCommands(Message message) {
-        if (MessageContent.startsWith("!color")) {
+    private void normalCommands() {
+        if (MessageContent.startsWith(Prefix + "color")) {
             int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
 
             if (DBRoleCount > 0) {
-                ListIterator<Role> userRoles = message.getUserAuthor().get().getRoles(Server).listIterator();
+                ListIterator<Role> userRoles = Message.getUserAuthor().get().getRoles(Server).listIterator();
 
                 while (userRoles.hasNext()) {
                     Role userRole = userRoles.next();
                     for (int i = 0; i < DBRoleCount; i++) {
-                        if(DBServer.getServer(ServerID).getRoles().getRoleType(i).equalsIgnoreCase("color")) {
+                        if (DBServer.getServer(ServerID).getRoles().getRoleType(i).equalsIgnoreCase("color")) {
                             if (userRole.getId() == DBServer.getServer(ServerID).getRoles().getRoleID(i)) {
-                                message.getUserAuthor().get().removeRole(userRole);
+                                Message.getUserAuthor().get().removeRole(userRole);
                             }
                         }
                     }
@@ -202,7 +163,7 @@ public class MessageListener implements MessageCreateListener {
             }
 
             Message.delete();
-        } else if (MessageContent.startsWith("!m-a")) {
+        } else if (MessageContent.startsWith(Prefix + "m-a")) {
             ServerVoiceChannel voiceChannel = null;
             try {
                 voiceChannel = Message.getUserAuthor().get().getConnectedVoiceChannel(Server).get();
@@ -227,27 +188,69 @@ public class MessageListener implements MessageCreateListener {
                 }
             }
             Message.delete();
-        } else if (MessageContent.startsWith("!help")) {
+        } else if (MessageContent.startsWith(Prefix + "help")) {
+            getHelpMessage(false);
+        }
+    }
+
+    private void getHelpMessage(boolean admin) {
+        if (MessageContent.startsWith(Prefix + "help")) {
             String colorInfoString = getColorInfoString();
 
-            TextChannel textChannel = message.getChannel();
+            TextChannel textChannel = Message.getChannel();
             EmbedBuilder embed;
 
             if (colorInfoString.length() != 0) {
                 embed = new EmbedBuilder()
                         .setTitle("Bot-Befehle")
-                        .addField("!help", "Diese Liste")
-                        .addField("!m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)")
-                        .addField("!color [color]", colorInfoString)
-                        .addField("!color", "Farbe entfernen");
+                        .addField(Prefix + "help", "Diese Liste")
+                        .addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)")
+                        .addField(Prefix + "color [color]", colorInfoString)
+                        .addField(Prefix + "color", "Farbe entfernen");
             } else {
                 embed = new EmbedBuilder()
                         .setTitle("Bot-Befehle")
-                        .addField("!help", "Diese Liste")
-                        .addField("!m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)");
+                        .addField(Prefix + "help", "Diese Liste")
+                        .addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)");
             }
 
             textChannel.sendMessage(embed);
+
+            Message.delete();
+        } else if (admin) {
+            TextChannel textChannel;
+            int AdminChannelID_Cache = DBServer.getServer(Server.getId()).getChannels().getID("admin");
+            if (AdminChannelID_Cache > -1) {
+                long AdminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannelID(AdminChannelID_Cache);
+                textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
+            } else {
+                textChannel = Message.getChannel().asTextChannel().get();
+            }
+
+            EmbedBuilder embed = null;
+
+            if (MessageContent.startsWith(Prefix + "help-all")) {
+                embed = new EmbedBuilder()
+                        .setTitle("Bot-Befehle")
+                        .addField("Admin-Befehle (Ohne Bot-Berechtigungen)", "\u200B")
+                        .addField(Prefix + "help-all", "Diese Liste")
+                        .addField(Prefix + "help-set", "Bot-Befehle (Bot Variablen setzen)")
+                        .addField(Prefix + "clear [Wert]", "Loescht [Wert] Nachrichten aus einem TextChannel")
+                        .addField("\u200B", "\u200B")
+                        .addField("Admin-Befehle (Mit Bot-Berechtigungen)", "\u200B")
+                        .addField(Prefix + "add-role [UserMention] [RoleMention]", "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]")
+                        .addField(Prefix + "remove-role [UserMention] [RoleMention]", "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]");
+            } else if (MessageContent.startsWith(Prefix + "help-set")) {
+                embed = new EmbedBuilder()
+                        .setTitle("Bot-Befehle (Bot Variablen setzen)")
+                        .addField(Prefix + "help-set", "Diese Liste")
+                        .addField(Prefix + "channel-set [channelMention] [channelName]", "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu. \n Fuer Admin (Beispiel): !channel-set #admin admin")
+                        .addField(Prefix + "role-set [roleMention] [roleType] [roleName]", "Fuegt einer Rolle [roleMention] einen Typ [roleType] und \n einen Namen [roleName] hinzu. \n Fuer eine Farbe (Beispiel): !role-set @yellow color yellow");
+            }
+
+            if (embed != null) {
+                textChannel.sendMessage(embed);
+            }
 
             Message.delete();
         }
@@ -255,25 +258,21 @@ public class MessageListener implements MessageCreateListener {
 
     //Get colorInfoString from DB role information
     private String getColorInfoString() {
-        int roleCountDB = DBServer.getServer(Server.getId()).getRoles().count();
+        int roleCountDB = DBServer.getServer(ServerID).getRoles().count();
         int colorCount = 0;
 
         StringBuilder colorInfoString = new StringBuilder("Farben: ");
 
         for (int i = 0; i < roleCountDB; i++) {
-            System.out.println(DBServer.getServer(Server.getId()).getRoles().getRoleType(i));
-            if (DBServer.getServer(Server.getId()).getRoles().getRoleType(i).equalsIgnoreCase("color")) {
+            if (DBServer.getServer(ServerID).getRoles().getRoleType(i).equals("color")) {
                 if (colorInfoString.toString().equals("Farben: ")) {
-                    colorInfoString.append(DBServer.getServer(Server.getId()).getRoles().getRoleName(i));
+                    colorInfoString.append(DBServer.getServer(ServerID).getRoles().getRoleName(i));
                 } else {
-                    colorInfoString.append(",").append(DBServer.getServer(Server.getId()).getRoles().getRoleName(i));
+                    colorInfoString.append(" ,").append(DBServer.getServer(ServerID).getRoles().getRoleName(i));
                 }
                 colorCount++;
             }
         }
-
-        System.out.println(colorCount);
-        System.out.println(colorInfoString.toString());
 
         if (colorCount == 0) {
             return "";
@@ -283,7 +282,7 @@ public class MessageListener implements MessageCreateListener {
     }
 
     //Get the first mentioned Role of the Message or the RoleID
-    private Role getRole_FromMessage(Message message) {
+    private Role getFirstRole_FromMessage(Message message) {
         long roleID = 0;
 
         if (!message.getMentionedRoles().isEmpty()) {
@@ -305,7 +304,7 @@ public class MessageListener implements MessageCreateListener {
     }
 
     //Get the first mentioned User of the Message or the UserID
-    private User getUser_FromMessage(Message message) {
+    private User getFirstUser_FromMessage(Message message) {
         long userID = 0;
 
         if (!message.getMentionedUsers().isEmpty()) {

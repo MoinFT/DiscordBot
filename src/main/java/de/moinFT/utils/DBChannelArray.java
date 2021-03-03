@@ -3,9 +3,9 @@ package de.moinFT.utils;
 public class DBChannelArray {
     private int ID;
     private int DB_ID;
-    private long channelID;
-    private String channelType;
-    private String channelName;
+    private long ChannelID;
+    private String ChannelType;
+    private String ChannelName;
 
     private boolean free;
     private DBChannelArray follower;
@@ -13,20 +13,20 @@ public class DBChannelArray {
     public DBChannelArray() {
         this.ID = 0;
         this.DB_ID = 0;
-        this.channelID = 0;
-        this.channelType = "";
-        this.channelName = "";
+        this.ChannelID = 0;
+        this.ChannelType = "";
+        this.ChannelName = "";
 
         this.free = true;
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long channelID, String channelType, String channelName){
+    public void setData(int DB_ID, long ChannelID, String ChannelType, String ChannelName){
         if (this.free){
             this.DB_ID = DB_ID;
-            this.channelID = channelID;
-            this.channelType = channelType;
-            this.channelName = channelName;
+            this.ChannelID = ChannelID;
+            this.ChannelType = ChannelType;
+            this.ChannelName = ChannelName;
 
             this.free = false;
         } else {
@@ -35,38 +35,59 @@ public class DBChannelArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, channelID, channelType, channelName);
+            this.follower.setData(DB_ID, ChannelID, ChannelType, ChannelName);
         }
     }
 
-    public void updateChannelName(long channelID, String channelName){
-        if(this.channelID == channelID){
-            this.channelName = channelName;
+    public void updateChannelName(long ChannelID, String ChannelName){
+        if(this.ChannelID == ChannelID){
+            this.ChannelName = ChannelName;
         } else {
             if (this.follower != null){
-                this.follower.updateChannelName(channelID, channelName);
+                this.follower.updateChannelName(ChannelID, ChannelName);
             }
         }
     }
 
-    public int getID(long channelID){
-        if(this.channelID == channelID){
+    public void delete(long ChannelID) {
+        if (this.ChannelID == ChannelID) {
+            if(this.follower != null){
+                this.DB_ID = this.follower.DB_ID;
+                this.ChannelID = this.follower.ChannelID;
+                this.ChannelType = this.follower.ChannelType;
+                this.ChannelName = this.follower.ChannelName;
+            } else {
+                this.DB_ID = 0;
+                this.ChannelID = 0;
+                this.ChannelType = "";
+                this.ChannelName = "";
+                this.free = true;
+            }
+        } else {
+            if (this.follower != null) {
+                this.follower.delete(ChannelID);
+            }
+        }
+    }
+
+    public int getID(long ChannelID){
+        if(this.ChannelID == ChannelID){
             return this.ID;
         } else {
             if (this.follower != null){
-                return this.follower.getID(channelID);
+                return this.follower.getID(ChannelID);
             } else {
                 return -1;
             }
         }
     }
 
-    public int getID(String channelName){
-        if(this.channelName.equalsIgnoreCase(channelName)){
+    public int getID(String ChannelName){
+        if(this.ChannelName.equalsIgnoreCase(ChannelName)){
             return this.ID;
         } else {
             if (this.follower != null){
-                return this.follower.getID(channelName);
+                return this.follower.getID(ChannelName);
             } else {
                 return -1;
             }
@@ -85,24 +106,12 @@ public class DBChannelArray {
         }
     }
 
-    public int getDB_ID(long channelID){
-        if(this.channelID == channelID){
+    public int getDB_ID(long ChannelID){
+        if(this.ChannelID == ChannelID){
             return this.DB_ID;
         } else {
             if (this.follower != null){
-                return this.follower.getDB_ID(channelID);
-            } else {
-                return -1;
-            }
-        }
-    }
-
-    public int getDB_ID(String channelName){
-        if(this.channelName.equalsIgnoreCase(channelName)){
-            return this.DB_ID;
-        } else {
-            if (this.follower != null){
-                return this.follower.getDB_ID(channelName);
+                return this.follower.getDB_ID(ChannelID);
             } else {
                 return -1;
             }
@@ -111,7 +120,7 @@ public class DBChannelArray {
 
     public long getChannelID(int ID){
         if (this.ID == ID){
-            return this.channelID;
+            return this.ChannelID;
         } else {
             if (this.follower != null){
                 return this.follower.getChannelID(ID);
@@ -123,7 +132,7 @@ public class DBChannelArray {
 
     public String getChannelName(int ID){
         if (this.ID == ID){
-            return this.channelName;
+            return this.ChannelName;
         } else {
             if (this.follower != null){
                 return this.follower.getChannelName(ID);
