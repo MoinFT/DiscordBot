@@ -6,6 +6,7 @@ import org.javacord.api.event.server.ServerJoinEvent;
 import org.javacord.api.listener.server.ServerJoinListener;
 
 import static de.moinFT.main.Main.*;
+import static de.moinFT.main.Functions.*;
 
 
 public class SJoinListener implements ServerJoinListener {

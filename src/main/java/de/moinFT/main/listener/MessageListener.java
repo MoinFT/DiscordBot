@@ -1,20 +1,25 @@
 package de.moinFT.main.listener;
 
 import de.moinFT.main.DatabaseConnection;
-import org.javacord.api.entity.channel.ServerVoiceChannel;
-import org.javacord.api.entity.channel.TextChannel;
+import de.moinFT.main.Functions;
+import org.javacord.api.entity.channel.*;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
+import org.javacord.api.entity.permission.PermissionType;
+import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.entity.user.UserStatus;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
 
+import java.time.ZoneId;
 import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 
+import static de.moinFT.main.Functions.*;
 import static de.moinFT.main.Main.DBServer;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
@@ -38,7 +43,7 @@ public class MessageListener implements MessageCreateListener {
         if (Message.isServerMessage()) {
             if (!Message.getUserAuthor().get().isBot()) {
                 if (MessageContent.startsWith(Prefix)) {
-                    if (event.getMessageAuthor().isServerAdmin()) {
+                    if (DBServer.getServer(ServerID).getUsers().getBotPermission(Message.getUserAuthor().get().getId())) {
                         if (MessageContent.startsWith(Prefix + "clear")) {
                             int MessValue = 0;
 
@@ -54,21 +59,55 @@ public class MessageListener implements MessageCreateListener {
                                 System.out.println("Error: Messages couldn't be deleted (check Permissions)!");
                                 e.printStackTrace();
                             }
+                        } else if (MessageContent.startsWith(Prefix + "toggle-bot-permission")) {
+                            User user = getFirstUser_FromMessage(1, Message);
+
+                            if (user != null) {
+                                long userID = user.getId();
+                                boolean botPermission = DBServer.getServer(ServerID).getUsers().getBotPermission(userID);
+
+                                if (userID != Message.getUserAuthor().get().getId()) {
+                                    int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getID("admin");
+
+                                    if (adminChannelID != -1) {
+                                        ServerChannel adminChannel = Server.getChannelById(DBServer.getServer(ServerID).getChannels().getChannelID(adminChannelID)).get();
+
+                                        if (!botPermission) {
+                                            new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                                        } else {
+                                            new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setUnset(PermissionType.READ_MESSAGES).build()).update();
+                                        }
+                                    }
+
+                                    DBServer.getServer(ServerID).getUsers().updateBotPermission(userID, !botPermission);
+                                    DatabaseConnection.DBUpdateItem(Server.getId() + "_User", DBServer.getServer(ServerID).getUsers().getDB_ID(userID), "`botPermission` = '" + !botPermission + "'");
+                                }
+                            }
+
+                            Message.delete();
                         } else if (MessageContent.startsWith(Prefix + "add-role")) {
+                            Role highestRole = getUserHighestRole(Server, Message.getUserAuthor().get());
+
                             Role addRole = getFirstRole_FromMessage(Message);
-                            User addUser = getFirstUser_FromMessage(Message);
+                            User addUser = getFirstUser_FromMessage(2, Message);
 
                             if (addRole != null && addUser != null) {
-                                Server.addRoleToUser(addUser, addRole);
+                                if (highestRole.getPosition() >= addRole.getPosition()) {
+                                    Server.addRoleToUser(addUser, addRole);
+                                }
                             }
 
                             Message.delete();
                         } else if (MessageContent.startsWith(Prefix + "remove-role")) {
+                            Role highestRole = getUserHighestRole(Server, Message.getUserAuthor().get());
+
                             Role removeRole = getFirstRole_FromMessage(Message);
-                            User removeUser = getFirstUser_FromMessage(Message);
+                            User removeUser = getFirstUser_FromMessage(2, Message);
 
                             if (removeRole != null && removeUser != null) {
-                                Server.removeRoleFromUser(removeUser, removeRole);
+                                if (highestRole.getPosition() >= removeRole.getPosition()) {
+                                    Server.removeRoleFromUser(removeUser, removeRole);
+                                }
                             }
 
                             Message.delete();
@@ -118,7 +157,7 @@ public class MessageListener implements MessageCreateListener {
                             DatabaseConnection.DBUpdateItem(Server.getId() + "_Role", DBServer.getServer(ServerID).getRoles().getDB_ID(roleID), "`roleName` = '" + roleName + "'");
 
                             Message.delete();
-                        } else if (MessageContent.startsWith(Prefix + "help-all") || MessageContent.startsWith(Prefix + "help-set")) {
+                        } else if (MessageContent.equalsIgnoreCase(Prefix + "help-all") || MessageContent.equalsIgnoreCase(Prefix + "help-set")) {
                             getHelpMessage(true);
                         } else {
                             normalCommands();
@@ -127,6 +166,8 @@ public class MessageListener implements MessageCreateListener {
                         normalCommands();
                     }
                 }
+            } else {
+                Functions.messageDelete(Message);
             }
         }
     }
@@ -163,6 +204,64 @@ public class MessageListener implements MessageCreateListener {
             }
 
             Message.delete();
+        } else if (MessageContent.startsWith(Prefix + "info-user")) {
+            User User = getFirstUser_FromMessage(1, Message);
+
+            String joinDateString = User.getJoinedAtTimestamp(Server).get().atZone(ZoneId.systemDefault()).toString().split("T")[0];
+            String joinDay = joinDateString.split("-")[2];
+            String joinMonth = joinDateString.split("-")[1];
+            String joinYear = joinDateString.split("-")[0];
+            String joinDate = joinDay + "." + joinMonth + "." + joinYear;
+
+            String botPermission;
+            if (DBServer.getServer(ServerID).getUsers().getBotPermission(User.getId())) {
+                botPermission = "Ja";
+            } else {
+                botPermission = "Nein";
+            }
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setAuthor(User)
+                    .setTitle("User Info")
+                    .addInlineField("Username:", User.getName())
+                    .addInlineField("\u200B", "\u200B")
+                    .addInlineField("Nickname:", User.getDisplayName(Server))
+                    .addInlineField("Ist User seit:", joinDate)
+                    .addInlineField("\u200B", "\u200B")
+                    .addInlineField("Bot-Berechtigungen", botPermission);
+
+            Message.getChannel().sendMessage(embed);
+
+            Message.delete();
+        } else if (MessageContent.startsWith(Prefix + "info-server")) {
+            String createDateString = Server.getCreationTimestamp().atZone(ZoneId.systemDefault()).toString().split("T")[0];
+            String createDay = createDateString.split("-")[2];
+            String createMonth = createDateString.split("-")[1];
+            String createYear = createDateString.split("-")[0];
+            String createDate = createDay + "." + createMonth + "." + createYear;
+
+            Iterator<User> users = Server.getMembers().iterator();
+            int usersOnline = 0;
+
+            while (users.hasNext()) {
+                User user = users.next();
+                if (user.getDesktopStatus() != UserStatus.OFFLINE || user.getMobileStatus() != UserStatus.OFFLINE) {
+                    usersOnline++;
+                }
+            }
+
+            EmbedBuilder embed = new EmbedBuilder()
+                    .setTitle("Server Info")
+                    .addInlineField("Server Besitzer:", Server.getOwner().get().getDisplayName(Server))
+                    .addInlineField("\u200B", "\u200B")
+                    .addInlineField("Ist existent seit:", createDate)
+                    .addInlineField("Anzahl User:", String.valueOf(Server.getMemberCount()))
+                    .addInlineField("\u200B", "\u200B")
+                    .addInlineField("Anzahl User (Online):", String.valueOf(usersOnline));
+
+            Message.getChannel().sendMessage(embed);
+
+            Message.delete();
         } else if (MessageContent.startsWith(Prefix + "m-a")) {
             ServerVoiceChannel voiceChannel = null;
             try {
@@ -188,30 +287,28 @@ public class MessageListener implements MessageCreateListener {
                 }
             }
             Message.delete();
-        } else if (MessageContent.startsWith(Prefix + "help")) {
+        } else if (MessageContent.equalsIgnoreCase(Prefix + "help")) {
             getHelpMessage(false);
         }
     }
 
     private void getHelpMessage(boolean admin) {
-        if (MessageContent.startsWith(Prefix + "help")) {
+        if (MessageContent.equalsIgnoreCase(Prefix + "help")) {
             String colorInfoString = getColorInfoString();
 
             TextChannel textChannel = Message.getChannel();
-            EmbedBuilder embed;
+            EmbedBuilder embed = new EmbedBuilder();
+
+            embed.setTitle("Bot-Befehle");
+            embed.addField(Prefix + "help", "Diese Liste");
+            embed.addField(Prefix + "info-user [UserMention]", "Zeigt Informationen über den User [UserMention] an.");
+            embed.addField(Prefix + "info-server", "Zeigt Informationen über den Server an.");
+            embed.addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)");
 
             if (colorInfoString.length() != 0) {
-                embed = new EmbedBuilder()
-                        .setTitle("Bot-Befehle")
-                        .addField(Prefix + "help", "Diese Liste")
-                        .addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)")
-                        .addField(Prefix + "color [color]", colorInfoString)
-                        .addField(Prefix + "color", "Farbe entfernen");
-            } else {
-                embed = new EmbedBuilder()
-                        .setTitle("Bot-Befehle")
-                        .addField(Prefix + "help", "Diese Liste")
-                        .addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)");
+
+                embed.addField(Prefix + "color [color]", colorInfoString);
+                embed.addField(Prefix + "color", "Farbe entfernen");
             }
 
             textChannel.sendMessage(embed);
@@ -229,26 +326,41 @@ public class MessageListener implements MessageCreateListener {
 
             EmbedBuilder embed = null;
 
-            if (MessageContent.startsWith(Prefix + "help-all")) {
-                embed = new EmbedBuilder()
-                        .setTitle("Bot-Befehle")
-                        .addField("Admin-Befehle (Ohne Bot-Berechtigungen)", "\u200B")
-                        .addField(Prefix + "help-all", "Diese Liste")
-                        .addField(Prefix + "help-set", "Bot-Befehle (Bot Variablen setzen)")
-                        .addField(Prefix + "clear [Wert]", "Loescht [Wert] Nachrichten aus einem TextChannel")
-                        .addField("\u200B", "\u200B")
-                        .addField("Admin-Befehle (Mit Bot-Berechtigungen)", "\u200B")
-                        .addField(Prefix + "add-role [UserMention] [RoleMention]", "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]")
-                        .addField(Prefix + "remove-role [UserMention] [RoleMention]", "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]");
-            } else if (MessageContent.startsWith(Prefix + "help-set")) {
-                embed = new EmbedBuilder()
-                        .setTitle("Bot-Befehle (Bot Variablen setzen)")
-                        .addField(Prefix + "help-set", "Diese Liste")
-                        .addField(Prefix + "channel-set [channelMention] [channelName]", "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu. \n Fuer Admin (Beispiel): !channel-set #admin admin")
-                        .addField(Prefix + "role-set [roleMention] [roleType] [roleName]", "Fuegt einer Rolle [roleMention] einen Typ [roleType] und \n einen Namen [roleName] hinzu. \n Fuer eine Farbe (Beispiel): !role-set @yellow color yellow");
+            if (MessageContent.equalsIgnoreCase(Prefix + "help-all")) {
+                embed = new EmbedBuilder();
+                embed.setTitle("Bot-Befehle (Mit Bot-Berechtigungen)");
+                embed.addField("Admin-Befehle", "\u200B");
+                embed.addField(Prefix + "help-all", "Diese Liste");
+                embed.addField(Prefix + "help-set", "Bot-Befehle (Bot Variablen setzen)");
+                embed.addField(Prefix + "clear [Wert]", "Loescht [Wert] Nachrichten aus einem TextChannel");
+                embed.addField(Prefix + "add-role [UserMention] [RoleMention]", "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]");
+                embed.addField(Prefix + "remove-role [UserMention] [RoleMention]", "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]");
+                embed.addField(Prefix + "toggle-permission-bot [UserMention]", "Gibt/Nimmt dem Nutzer (UserID) die Berechtigung die Befehle mit Bot Berechtigungen");
+            } else if (MessageContent.equalsIgnoreCase(Prefix + "help-set")) {
+                embed = new EmbedBuilder();
+                embed.setTitle("Bot-Befehle");
+                embed.addField("Admin-Befehle (Bot Variablen setzen)", "\u200B");
+                embed.addField(Prefix + "help-set", "Diese Liste");
+                embed.addField(Prefix + "channel-set [channelMention] [channelName]", "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu. \n Fuer Admin (Beispiel): !channel-set #admin admin");
+                embed.addField(Prefix + "role-set [roleMention] [roleType] [roleName]", "Fuegt einer Rolle [roleMention] einen Typ [roleType] und \n einen Namen [roleName] hinzu. \n Fuer eine Farbe (Beispiel): !role-set @yellow color yellow");
             }
 
             if (embed != null) {
+                String colorInfoString = getColorInfoString();
+
+                embed.addField("\u200B", "\u200B");
+                embed.addField("Normale-Befehle", "\u200B");
+                embed.addField(Prefix + "help", "Diese Liste");
+                embed.addField(Prefix + "info-user [UserMention]", "Zeigt Informationen über den User [UserMention] an.");
+                embed.addField(Prefix + "info-server", "Zeigt Informationen über den Server an.");
+                embed.addField(Prefix + "m-a", "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)");
+
+                if (colorInfoString.length() != 0) {
+
+                    embed.addField(Prefix + "color [color]", colorInfoString);
+                    embed.addField(Prefix + "color", "Farbe entfernen");
+                }
+
                 textChannel.sendMessage(embed);
             }
 
@@ -268,7 +380,7 @@ public class MessageListener implements MessageCreateListener {
                 if (colorInfoString.toString().equals("Farben: ")) {
                     colorInfoString.append(DBServer.getServer(ServerID).getRoles().getRoleName(i));
                 } else {
-                    colorInfoString.append(" ,").append(DBServer.getServer(ServerID).getRoles().getRoleName(i));
+                    colorInfoString.append(", ").append(DBServer.getServer(ServerID).getRoles().getRoleName(i));
                 }
                 colorCount++;
             }
@@ -304,14 +416,14 @@ public class MessageListener implements MessageCreateListener {
     }
 
     //Get the first mentioned User of the Message or the UserID
-    private User getFirstUser_FromMessage(Message message) {
+    private User getFirstUser_FromMessage(int indexOfUserMention, Message message) {
         long userID = 0;
 
         if (!message.getMentionedUsers().isEmpty()) {
             return message.getMentionedUsers().get(0);
         } else {
             try {
-                userID = parseLong(MessageContent.split(" ")[2]);
+                userID = parseLong(MessageContent.split(" ")[indexOfUserMention]);
             } catch (Exception e) {
                 System.out.println("The Message doesn't contain an UserID!");
             }

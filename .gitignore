@@ -1,6 +1,9 @@
 # Project exclude paths
 /.gradle/
+/.idea/
 /build/
+/out/
+/src/main/java/META-INF/
 
 !/src/main/java/de/moinFT/utils/*
 /src/main/java/de/moinFT/utils/Privates.java

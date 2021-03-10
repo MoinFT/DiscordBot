@@ -36,6 +36,16 @@ public class DBUserArray {
         }
     }
 
+    public void updateBotPermission(long UserID, boolean BotPermission){
+        if(this.UserID == UserID){
+            this.BotPermission = BotPermission;
+        } else {
+            if (this.follower != null){
+                this.follower.updateBotPermission(UserID, BotPermission);
+            }
+        }
+    }
+
     public void delete(int ID) {
         if (this.ID == ID) {
             if(this.follower != null){
@@ -120,6 +130,18 @@ public class DBUserArray {
                 return this.follower.getUserID(ID);
             } else {
                 return 0;
+            }
+        }
+    }
+
+    public boolean getBotPermission(long UserID) {
+        if (this.UserID == UserID) {
+            return this.BotPermission;
+        } else {
+            if (this.follower != null) {
+                return this.follower.getBotPermission(UserID);
+            } else {
+                return false;
             }
         }
     }
