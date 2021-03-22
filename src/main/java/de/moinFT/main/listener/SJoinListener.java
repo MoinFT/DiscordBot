@@ -48,7 +48,7 @@ public class SJoinListener implements ServerJoinListener {
 
         int DB_ID = DatabaseConnection.DBGetDB_ID("server", "serverID", String.valueOf(ServerID));
 
-        DBServer.setData(DB_ID, ServerID, "!");
+        DBServer.setData(DB_ID, ServerID, "!", "-");
 
         for (int i = 0; i < DBServer.count(); i++) {
             if(DBServer.getServerID(i) == ServerID){

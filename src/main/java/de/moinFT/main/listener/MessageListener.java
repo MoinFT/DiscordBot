@@ -38,10 +38,10 @@ public class MessageListener implements MessageCreateListener {
         ServerID = Server.getId();
         Message = event.getMessage();
         MessageContent = event.getMessageContent().toLowerCase();
-        Prefix = DBServer.getPrefix(ServerID);
+        Prefix = DBServer.getServer(ServerID).getPrefix();
 
         if (Message.isServerMessage()) {
-            if (!Message.getUserAuthor().get().isBot()) {
+            if (!Message.getUserAuthor().get().isYourself() && !Message.getUserAuthor().get().isBot()) {
                 if (MessageContent.startsWith(Prefix)) {
                     if (DBServer.getServer(ServerID).getUsers().getBotPermission(Message.getUserAuthor().get().getId())) {
                         if (MessageContent.startsWith(Prefix + "clear")) {
@@ -111,6 +111,22 @@ public class MessageListener implements MessageCreateListener {
                             }
 
                             Message.delete();
+                        } else if (MessageContent.startsWith(Prefix + "set-musicbot-prefix")) {
+                            String prefix = "";
+
+                            try {
+                                prefix = MessageContent.split(" ")[1];
+                                if (prefix.equals("_")) {
+                                    prefix = "";
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Error: No prefix found in the message!");
+                            }
+
+                            DBServer.getServer(ServerID).updateMusicBotPrefix(prefix);
+                            DatabaseConnection.DBUpdateItem("server", DBServer.getServer(ServerID).getDB_ID(), "`musicBotPrefix` = '" + prefix + "'");
+
+                            Message.delete();
                         } else if (MessageContent.startsWith(Prefix + "channel-set")) {
                             long channelID = Message.getMentionedChannels().get(0).asTextChannel().get().getId();
                             String channelName = "";
@@ -135,7 +151,7 @@ public class MessageListener implements MessageCreateListener {
 
                             try {
                                 roleType = MessageContent.split(" ")[2];
-                                if (roleType.equals("-")) {
+                                if (roleType.equals("_")) {
                                     roleType = "";
                                 }
                             } catch (Exception e) {
@@ -144,7 +160,7 @@ public class MessageListener implements MessageCreateListener {
 
                             try {
                                 roleName = MessageContent.split(" ")[3];
-                                if (roleName.equals("-")) {
+                                if (roleName.equals("_")) {
                                     roleName = "";
                                 }
                             } catch (Exception e) {
@@ -165,9 +181,16 @@ public class MessageListener implements MessageCreateListener {
                     } else {
                         normalCommands();
                     }
+                } else if (MessageContent.startsWith(DBServer.getServer(Server.getId()).getMusicBotPrefix())) {
+                    int musicbotChannelID = DBServer.getServer(Server.getId()).getChannels().getID("musicbot");
+                    if (Message.getChannel().getId() == DBServer.getServer(Server.getId()).getChannels().getChannelID(musicbotChannelID)) {
+                        Functions.messageDelete(Message, 5000);
+                    }
                 }
+            } else if (!Message.getUserAuthor().get().isYourself() && Message.getUserAuthor().get().isBot()) {
+                Functions.messageDelete(Message, 2500);
             } else {
-                Functions.messageDelete(Message);
+                Functions.messageDelete(Message, 45000);
             }
         }
     }
@@ -226,7 +249,7 @@ public class MessageListener implements MessageCreateListener {
                     .addInlineField("Username:", User.getName())
                     .addInlineField("\u200B", "\u200B")
                     .addInlineField("Nickname:", User.getDisplayName(Server))
-                    .addInlineField("Ist User seit:", joinDate)
+                    .addInlineField("Ist Member seit:", joinDate)
                     .addInlineField("\u200B", "\u200B")
                     .addInlineField("Bot-Berechtigungen", botPermission);
 
@@ -240,24 +263,14 @@ public class MessageListener implements MessageCreateListener {
             String createYear = createDateString.split("-")[0];
             String createDate = createDay + "." + createMonth + "." + createYear;
 
-            Iterator<User> users = Server.getMembers().iterator();
-            int usersOnline = 0;
-
-            while (users.hasNext()) {
-                User user = users.next();
-                if (user.getDesktopStatus() != UserStatus.OFFLINE || user.getMobileStatus() != UserStatus.OFFLINE) {
-                    usersOnline++;
-                }
-            }
-
             EmbedBuilder embed = new EmbedBuilder()
                     .setTitle("Server Info")
                     .addInlineField("Server Besitzer:", Server.getOwner().get().getDisplayName(Server))
                     .addInlineField("\u200B", "\u200B")
                     .addInlineField("Ist existent seit:", createDate)
-                    .addInlineField("Anzahl User:", String.valueOf(Server.getMemberCount()))
+                    .addInlineField("Anzahl Member:", String.valueOf(Server.getMemberCount()))
                     .addInlineField("\u200B", "\u200B")
-                    .addInlineField("Anzahl User (Online):", String.valueOf(usersOnline));
+                    .addInlineField("Anzahl Member (Online):", String.valueOf(Functions.membersOnlineCount(Server)));
 
             Message.getChannel().sendMessage(embed);
 

@@ -17,7 +17,7 @@ public class SLeaveListener implements ServerLeaveListener {
         Server = event.getServer();
         ServerID = Server.getId();
 
-        DatabaseConnection.DBDeleteItem("server", DBServer.getDB_ID(ServerID));
+        DatabaseConnection.DBDeleteItem("server", DBServer.getServer(ServerID).getDB_ID());
         DatabaseConnection.DB_SQL_Execute("DROP TABLE " + ServerID +  "_Channel");
         DatabaseConnection.DB_SQL_Execute("DROP TABLE " + ServerID +  "_Role");
         DatabaseConnection.DB_SQL_Execute("DROP TABLE " + ServerID +  "_User");

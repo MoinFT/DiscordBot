@@ -6,6 +6,7 @@ import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
+import org.javacord.api.entity.user.UserStatus;
 
 import java.util.Iterator;
 
@@ -13,15 +14,15 @@ import static de.moinFT.main.Main.DBServer;
 import static de.moinFT.main.Main.client;
 
 public class Functions {
-    public static void messageDelete(Message message) {
+    public static void messageDelete(Message message, int timeout) {
         Server server = message.getServer().get();
 
-        int deleteMessageChannelID = DBServer.getServer(server.getId()).getChannels().getID("info");
+        int infoChannelID = DBServer.getServer(server.getId()).getChannels().getID("info");
 
         Thread newThread = new Thread(() -> {
             try {
-                if (message.getChannel().getId() != DBServer.getServer(server.getId()).getChannels().getChannelID(deleteMessageChannelID)) {
-                    Thread.sleep(45000);
+                if (message.getChannel().getId() != DBServer.getServer(server.getId()).getChannels().getChannelID(infoChannelID)) {
+                    Thread.sleep(timeout);
                     message.delete();
                 }
             } catch (InterruptedException e) {
@@ -29,6 +30,20 @@ public class Functions {
             }
         });
         newThread.start();
+    }
+
+    public static int membersOnlineCount(Server server) {
+        Iterator<User> users = server.getMembers().iterator();
+        int usersOnline = 0;
+
+        while (users.hasNext()) {
+            User user = users.next();
+            if (user.getDesktopStatus() != UserStatus.OFFLINE || user.getMobileStatus() != UserStatus.OFFLINE) {
+                usersOnline++;
+            }
+        }
+
+        return usersOnline;
     }
 
     public static Role getUserHighestRole(Server server, User user) {

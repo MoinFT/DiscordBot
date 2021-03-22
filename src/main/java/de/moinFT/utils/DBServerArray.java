@@ -5,6 +5,7 @@ public class DBServerArray {
     private int DB_ID;
     private long ServerID;
     private String prefix;
+    private String musicBotPrefix;
     private DBUserArray Users;
     private DBRoleArray Roles;
     private DBChannelArray Channels;
@@ -17,6 +18,7 @@ public class DBServerArray {
         this.DB_ID = 0;
         this.ServerID = 0;
         this.prefix = "";
+        this.musicBotPrefix = "";
         this.Users = new DBUserArray();
         this.Roles = new DBRoleArray();
         this.Channels = new DBChannelArray();
@@ -25,11 +27,12 @@ public class DBServerArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long serverID, String prefix) {
+    public void setData(int DB_ID, long serverID, String prefix, String musicBotPrefix) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.ServerID = serverID;
             this.prefix = prefix;
+            this.musicBotPrefix = musicBotPrefix;
 
             this.free = false;
         } else {
@@ -38,7 +41,7 @@ public class DBServerArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, serverID, prefix);
+            this.follower.setData(DB_ID, serverID, prefix, musicBotPrefix);
         }
     }
 
@@ -48,6 +51,7 @@ public class DBServerArray {
                 this.DB_ID = this.follower.DB_ID;
                 this.ServerID = this.follower.DB_ID;
                 this.prefix = this.follower.prefix;
+                this.musicBotPrefix = this.follower.musicBotPrefix;
                 this.Users = this.follower.Users;
                 this.Roles = this.follower.Roles;
                 this.Channels = this.follower.Channels;
@@ -55,6 +59,7 @@ public class DBServerArray {
                 this.DB_ID = 0;
                 this.ServerID = 0;
                 this.prefix = "";
+                this.musicBotPrefix = "";
                 this.Users = new DBUserArray();
                 this.Roles = new DBRoleArray();
                 this.Channels = new DBChannelArray();
@@ -114,16 +119,8 @@ public class DBServerArray {
         }
     }
 
-    public int getDB_ID(long ServerID) {
-        if (this.ServerID == ServerID) {
-            return this.DB_ID;
-        } else {
-            if (this.follower != null) {
-                return this.follower.getDB_ID(ServerID);
-            } else {
-                return -1;
-            }
-        }
+    public int getDB_ID() {
+        return this.DB_ID;
     }
 
     public long getServerID(int ID) {
@@ -138,16 +135,16 @@ public class DBServerArray {
         }
     }
 
-    public String getPrefix(long ServerID) {
-        if (this.ServerID == ServerID) {
-            return this.prefix;
-        } else {
-            if (this.follower != null) {
-                return this.follower.getPrefix(ServerID);
-            } else {
-                return "!";
-            }
-        }
+    public String getPrefix() {
+        return this.prefix;
+    }
+
+    public String getMusicBotPrefix() {
+        return this.musicBotPrefix;
+    }
+
+    public void updateMusicBotPrefix(String musicBotPrefix) {
+        this.musicBotPrefix = musicBotPrefix;
     }
 
     public DBUserArray getUsers() {

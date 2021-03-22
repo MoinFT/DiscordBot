@@ -27,7 +27,7 @@ public class DatabaseConnection {
             res = statement.executeQuery("SELECT * FROM `server`");
 
             while (res.next()) {
-                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getString("prefix"));
+                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getString("prefix"), res.getString("musicBotPrefix"));
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
