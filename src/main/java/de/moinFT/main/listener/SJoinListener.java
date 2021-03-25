@@ -19,7 +19,7 @@ public class SJoinListener implements ServerJoinListener {
         Server = event.getServer();
         ServerID = Server.getId();
 
-        DatabaseConnection.DBAddItem("server", "(`serverID`, `prefix`)", "('" + ServerID + "', '!')");
+        DatabaseConnection.DBAddItem("server", "(`serverID`, `commandTimeout`, `prefix`, `musicBotPrefix`)", "('" + ServerID + "', '0', '!', '-')");
 
         DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + ServerID + "_Channel` (" +
                 " `id` int(11) NOT NULL AUTO_INCREMENT," +
@@ -41,6 +41,7 @@ public class SJoinListener implements ServerJoinListener {
         DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + ServerID + "_User` (" +
                 " `id` int(11) NOT NULL AUTO_INCREMENT," +
                 " `userID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
+                " `isAdmin` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `botPermission` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " PRIMARY KEY (`id`)," +
                 " UNIQUE KEY `userID` (`userID`)" +
@@ -48,10 +49,10 @@ public class SJoinListener implements ServerJoinListener {
 
         int DB_ID = DatabaseConnection.DBGetDB_ID("server", "serverID", String.valueOf(ServerID));
 
-        DBServer.setData(DB_ID, ServerID, "!", "-");
+        DBServer.setData(DB_ID, ServerID, 0, "!", "-");
 
         for (int i = 0; i < DBServer.count(); i++) {
-            if(DBServer.getServerID(i) == ServerID){
+            if(DBServer.getServer(i).getServerID() == ServerID){
                 compareDBUser_WithGuildUser(i);
                 compareDBRole_WithGuildRole(i);
                 compareDBChannel_WithGuildChannel(i);

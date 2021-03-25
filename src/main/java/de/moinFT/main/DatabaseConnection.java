@@ -27,19 +27,19 @@ public class DatabaseConnection {
             res = statement.executeQuery("SELECT * FROM `server`");
 
             while (res.next()) {
-                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getString("prefix"), res.getString("musicBotPrefix"));
+                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getLong("commandTimeout"), res.getString("prefix"), res.getString("musicBotPrefix"));
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_User`");
+                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_User`");
 
                 while (res.next()) {
-                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getBoolean("botPermission"));
+                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getBoolean("isAdmin"), res.getBoolean("botPermission"));
                 }
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_Role`");
+                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Role`");
 
                 while (res.next()) {
                     DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
@@ -47,7 +47,7 @@ public class DatabaseConnection {
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServerID(i) + "_Channel`");
+                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Channel`");
 
                 while (res.next()) {
                     DBServer.getServer(i).getChannels().setData(res.getInt("id"), res.getLong("channelID"), res.getString("channelType"), res.getString("channelName"));

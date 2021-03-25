@@ -29,23 +29,27 @@ public class MemberJoinListener implements ServerMemberJoinListener {
             int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
 
             for (int i = 0; i < DBRoleCount; i++) {
-                if (DBServer.getServer(ServerID).getRoles().getRoleType(i).equalsIgnoreCase("user")) {
-                    Role role = Server.getRoleById(DBServer.getServer(ServerID).getRoles().getRoleID(i)).get();
+                if (DBServer.getServer(ServerID).getRoles().getRole(i).getRoleType().equalsIgnoreCase("user")) {
+                    Role role = Server.getRoleById(DBServer.getServer(ServerID).getRoles().getRole(i).getRoleID()).get();
 
                     User.addRole(role);
                 }
             }
         }
 
-        if (UserID == Privates.MyUserID || UserID == client.getServerById(ServerID).get().getOwnerId()) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `botPermission`)", "('" + UserID + "', 'true')");
+        boolean isAdmin = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User);
+        boolean botPermission = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User) || UserID == Privates.MyUserID;
+
+        if (isAdmin) {
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'true', 'true')");
+        } else if (UserID == Privates.MyUserID) {
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'false', 'true')");
         } else {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `botPermission`)", "('" + UserID + "', 'false')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'false', 'false')");
         }
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_User", "userID", String.valueOf(UserID));
 
-        boolean botPermission = UserID == Privates.MyUserID || UserID == client.getServerById(ServerID).get().getOwnerId();
-        DBServer.getServer(ServerID).getUsers().setData(DB_ID, UserID, botPermission);
+        DBServer.getServer(ServerID).getUsers().setData(DB_ID, UserID, isAdmin, botPermission);
     }
 }

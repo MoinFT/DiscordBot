@@ -22,7 +22,7 @@ public class RDeleteListener implements RoleDeleteListener {
         Role = event.getRole();
         RoleID = Role.getId();
 
-        DatabaseConnection.DBDeleteItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getDB_ID(RoleID));
+        DatabaseConnection.DBDeleteItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getRole(RoleID).getDB_ID());
         DBServer.getServer(ServerID).getRoles().delete(RoleID);
     }
 }

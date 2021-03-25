@@ -22,7 +22,7 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
         User = event.getUser();
         UserID = User.getId();
 
-        DatabaseConnection.DBDeleteItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getDB_ID(UserID));
+        DatabaseConnection.DBDeleteItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(UserID).getDB_ID());
         DBServer.getServer(ServerID).getUsers().delete(UserID);
     }
 }

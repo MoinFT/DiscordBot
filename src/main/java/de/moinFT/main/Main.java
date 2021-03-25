@@ -15,6 +15,11 @@ public class Main {
     public static DiscordApi client;
 
     public static void main(String[] args) {
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         DBServer = new DBServerArray();
         DatabaseConnection.DBGetAllData();
@@ -49,6 +54,9 @@ public class Main {
 
         client.addServerChannelCreateListener(new ChannelCreateListener());
         client.addServerChannelDeleteListener(new ChannelDeleteListener());
+
+        client.addUserRoleAddListener(new URoleAddListener());
+        client.addUserRoleRemoveListener(new URoleRemoveListener());
 
         client.addMessageCreateListener(new MessageListener());
     }

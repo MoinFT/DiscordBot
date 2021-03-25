@@ -4,6 +4,7 @@ public class DBUserArray {
     private int ID;
     private int DB_ID;
     private long UserID;
+    private boolean IsAdmin;
     private boolean BotPermission;
 
     private boolean free;
@@ -19,11 +20,12 @@ public class DBUserArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long UserID, boolean botPermission) {
+    public void setData(int DB_ID, long UserID, boolean IsAdmin, boolean BotPermission) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.UserID = UserID;
-            this.BotPermission = botPermission;
+            this.IsAdmin = IsAdmin;
+            this.BotPermission = BotPermission;
 
             this.free = false;
         } else {
@@ -32,23 +34,13 @@ public class DBUserArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, UserID, botPermission);
-        }
-    }
-
-    public void updateBotPermission(long UserID, boolean BotPermission){
-        if(this.UserID == UserID){
-            this.BotPermission = BotPermission;
-        } else {
-            if (this.follower != null){
-                this.follower.updateBotPermission(UserID, BotPermission);
-            }
+            this.follower.setData(DB_ID, UserID, IsAdmin, BotPermission);
         }
     }
 
     public void delete(int ID) {
         if (this.ID == ID) {
-            if(this.follower != null){
+            if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.UserID = this.follower.UserID;
                 this.BotPermission = this.follower.BotPermission;
@@ -68,7 +60,7 @@ public class DBUserArray {
 
     public void delete(long UserID) {
         if (this.UserID == UserID) {
-            if(this.follower != null){
+            if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.UserID = this.follower.UserID;
                 this.BotPermission = this.follower.BotPermission;
@@ -86,64 +78,56 @@ public class DBUserArray {
         }
     }
 
-    public int getID(long UserID) {
+    public DBUserArray getUser(long UserID) {
         if (this.UserID == UserID) {
-            return this.ID;
+            return this;
         } else {
             if (this.follower != null) {
-                return this.follower.getID(UserID);
+                return this.follower.getUser(UserID);
             } else {
-                return -1;
+                return null;
             }
         }
     }
 
-    public int getDB_ID(int ID) {
+    public DBUserArray getUser(int ID) {
         if (this.ID == ID) {
-            return this.DB_ID;
+            return this;
         } else {
             if (this.follower != null) {
-                return this.follower.getDB_ID(ID);
+                return this.follower.getUser(ID);
             } else {
-                return -1;
+                return null;
             }
         }
     }
 
-    public int getDB_ID(long UserID) {
-        if (this.UserID == UserID) {
-            return this.DB_ID;
-        } else {
-            if (this.follower != null) {
-                return this.follower.getDB_ID(UserID);
-            } else {
-                return -1;
-            }
-        }
+    public int getID() {
+        return this.ID;
     }
 
-    public long getUserID(int ID) {
-        if (this.ID == ID) {
-            return this.UserID;
-        } else {
-            if (this.follower != null) {
-                return this.follower.getUserID(ID);
-            } else {
-                return 0;
-            }
-        }
+    public int getDB_ID() {
+        return this.DB_ID;
     }
 
-    public boolean getBotPermission(long UserID) {
-        if (this.UserID == UserID) {
-            return this.BotPermission;
-        } else {
-            if (this.follower != null) {
-                return this.follower.getBotPermission(UserID);
-            } else {
-                return false;
-            }
-        }
+    public long getUserID() {
+        return this.UserID;
+    }
+
+    public void updateIsAdmin(boolean IsAdmin) {
+        this.IsAdmin = IsAdmin;
+    }
+
+    public boolean getIsAdmin() {
+        return this.IsAdmin;
+    }
+
+    public void updateBotPermission(boolean BotPermission) {
+        this.BotPermission = BotPermission;
+    }
+
+    public boolean getBotPermission() {
+        return this.BotPermission;
     }
 
     public int count() {

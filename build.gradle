@@ -1,8 +1,6 @@
 plugins {
-    id 'java'
     id 'idea'
     id 'groovy'
-    id 'maven'
 }
 
 group 'de.moinFT'
@@ -12,33 +10,9 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    shade
-    compile.extendsFrom shade
-}
-
 dependencies {
-    shade('org.javacord:javacord:3.1.2')
-    shade('mysql:mysql-connector-java:8.0.11')
-    shade('org.apache.logging.log4j:log4j-core:2.11.0')
-
-    files('C:/Users/fabia/.gradle/caches/modules-2/files-2.1/org.javacord/javacord-api/3.1.2/1f98369176f4ea00c5a1513af7285f98ffdd0fb9/javacord-api-3.1.2.jar')
-}
-
-jar {
-    /*configurations.shade.each { dep ->
-        from(project.zipTree(dep)) {
-            exclude 'META-INF', 'META-INF/**'
-        }
-    }*/
-
-    manifest {
-        attributes "Main-Class": "de.moinFT.main.Main"
-    }
-
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
-    }
+    implementation 'org.javacord:javacord:3.1.2'
+    implementation 'mysql:mysql-connector-java:8.0.11'
+    implementation 'org.apache.logging.log4j:log4j-core:2.11.0'
+    implementation 'com.vdurmont:emoji-java:5.1.1'
 }
