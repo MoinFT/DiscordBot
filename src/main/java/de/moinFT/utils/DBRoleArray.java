@@ -85,10 +85,6 @@ public class DBRoleArray {
         }
     }
 
-    public int getID() {
-        return this.ID;
-    }
-
     public int getDB_ID() {
         return this.DB_ID;
     }

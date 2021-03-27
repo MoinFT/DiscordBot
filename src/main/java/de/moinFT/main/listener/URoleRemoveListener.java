@@ -35,10 +35,10 @@ public class URoleRemoveListener implements UserRoleRemoveListener {
                 DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(User.getId()).getDB_ID(), "`botPermission` = '" + false + "'");
                 DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(User.getId()).getDB_ID(), "`isAdmin` = '" + false + "'");
 
-                int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getID("admin");
+                int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
 
                 if (adminChannelID != -1) {
-                    ServerChannel adminChannel = Server.getChannelById(DBServer.getServer(ServerID).getChannels().getChannelID(adminChannelID)).get();
+                    ServerChannel adminChannel = Server.getChannelById(DBServer.getServer(ServerID).getChannels().getChannel(adminChannelID).getChannelID()).get();
                     new ServerChannelUpdater(adminChannel).addPermissionOverwrite(User, new PermissionsBuilder().setUnset(PermissionType.READ_MESSAGES).build()).update();
                 }
             }

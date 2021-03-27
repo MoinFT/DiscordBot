@@ -1,6 +1,5 @@
 package de.moinFT.main;
 
-import de.moinFT.utils.DBUserArray;
 import de.moinFT.utils.Privates;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.message.Message;
@@ -28,13 +27,15 @@ public class Functions {
     public static void messageDelete(Message message, int timeout) {
         Server server = message.getServer().get();
 
-        int infoChannelID = DBServer.getServer(server.getId()).getChannels().getID("info");
+        int infoChannelID = DBServer.getServer(server.getId()).getChannels().getChannel("info").getID();
 
         Thread newThread = new Thread(() -> {
             try {
-                if (message.getChannel().getId() != DBServer.getServer(server.getId()).getChannels().getChannelID(infoChannelID)) {
-                    Thread.sleep(timeout);
-                    message.delete();
+                if (DBServer.getServer(server.getId()).getChannels().getChannel(infoChannelID) != null) {
+                    if (message.getChannel().getId() != DBServer.getServer(server.getId()).getChannels().getChannel(infoChannelID).getChannelID()) {
+                        Thread.sleep(timeout);
+                        message.delete();
+                    }
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -228,10 +229,10 @@ public class Functions {
 
         for (int i_Channel = 0; i_Channel < DBChannelCount; i_Channel++) {
             try {
-                client.getServerById(serverID).get().getChannelById(DBServer.getServer(i).getChannels().getChannelID(i_Channel)).get();
+                client.getServerById(serverID).get().getChannelById(DBServer.getServer(i).getChannels().getChannel(i_Channel).getChannelID()).get();
             } catch (Exception e) {
-                System.out.println("Remove Channel from DB: " + DBServer.getServer(i).getChannels().getDB_ID(i_Channel));
-                DatabaseConnection.DBDeleteItem(serverID + "_Channel", DBServer.getServer(i).getChannels().getDB_ID(i_Channel));
+                System.out.println("Remove Channel from DB: " + DBServer.getServer(i).getChannels().getChannel(i_Channel).getDB_ID());
+                DatabaseConnection.DBDeleteItem(serverID + "_Channel", DBServer.getServer(i).getChannels().getChannel(i_Channel).getDB_ID());
                 DBServer.getServer(serverID).getChannels().delete(i_Channel);
             }
         }
@@ -245,7 +246,7 @@ public class Functions {
             while (channels.hasNext()) {
                 ServerChannel channel = channels.next();
 
-                boolean existChannelDB = DBServer.getServer(i).getChannels().getID(channel.getId()) > -1;
+                boolean existChannelDB = DBServer.getServer(i).getChannels().getChannel(channel.getId()) != null;
 
                 if (!existChannelDB) {
                     String channelType;

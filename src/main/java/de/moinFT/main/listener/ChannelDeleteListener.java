@@ -22,7 +22,7 @@ public class ChannelDeleteListener implements ServerChannelDeleteListener {
         Channel = event.getChannel();
         ChannelID = Channel.getId();
 
-        DatabaseConnection.DBDeleteItem(ServerID + "_Channel", DBServer.getServer(ServerID).getChannels().getDB_ID(ChannelID));
+        DatabaseConnection.DBDeleteItem(ServerID + "_Channel", DBServer.getServer(ServerID).getChannels().getChannel(ChannelID).getDB_ID());
         DBServer.getServer(ServerID).getChannels().delete(ChannelID);
     }
 }
