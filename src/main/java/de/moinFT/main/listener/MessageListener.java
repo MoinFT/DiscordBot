@@ -24,7 +24,7 @@ import java.util.Iterator;
 import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 
-import static de.moinFT.main.Functions.*;
+import static de.moinFT.main.Functions.getUserHighestRole;
 import static de.moinFT.main.Main.DBServer;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
@@ -42,7 +42,7 @@ public class MessageListener implements MessageCreateListener {
     public void onMessageCreate(MessageCreateEvent event) {
         Server = event.getServer().get();
         ServerID = Server.getId();
-        commandTimeout = DBServer.getServer(ServerID).getCommandTimeout();
+        commandTimeout = DBServer.getServer(ServerID).getCommandTimeoutTimestamp();
         UserMessage = event.getMessage();
         UserMessageContent = UserMessage.getContent().toLowerCase();
         Prefix = DBServer.getServer(ServerID).getPrefix();
@@ -50,10 +50,10 @@ public class MessageListener implements MessageCreateListener {
         if (UserMessage.isServerMessage()) {
             TextChannel textChannel;
 
-            int AdminChannelID_Cache = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
-            if (AdminChannelID_Cache > -1) {
-                long AdminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel(AdminChannelID_Cache).getChannelID();
-                textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
+            DBChannelArray DBAdminChannel = DBServer.getServer(ServerID).getChannels().getChannel("admin");
+            if (DBAdminChannel != null) {
+                long adminChannelID = DBAdminChannel.getChannelID();
+                textChannel = Server.getChannelById(adminChannelID).get().asTextChannel().get();
             } else {
                 textChannel = UserMessage.getChannel();
             }
@@ -72,7 +72,7 @@ public class MessageListener implements MessageCreateListener {
                                 if (userID != UserMessage.getUserAuthor().get().getId()) {
                                     UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
 
-                                    int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
+                                    int adminChannelID = DBServer.getServer(ServerID).getChannels().getChannel("admin").getID();
 
                                     if (adminChannelID != -1) {
                                         ServerChannel adminChannel = Server.getChannelById(DBServer.getServer(ServerID).getChannels().getChannel(adminChannelID).getChannelID()).get();
@@ -85,7 +85,7 @@ public class MessageListener implements MessageCreateListener {
                                     }
 
                                     DBServer.getServer(ServerID).getUsers().getUser(userID).updateBotPermission(!botPermission);
-                                    DatabaseConnection.DBUpdateItem(Server.getId() + "_User", DBServer.getServer(ServerID).getUsers().getUser(userID).getDB_ID(), "`botPermission` = '" + !botPermission + "'");
+                                    DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(userID).getDB_ID(), "`botPermission` = '" + !botPermission + "'");
                                 } else {
                                     errorMessageWithReaction(", du kannst dir nicht selbst die Rechte entziehen!");
                                 }
@@ -268,7 +268,7 @@ public class MessageListener implements MessageCreateListener {
 
                                 if (channel.getType() != ChannelType.CHANNEL_CATEGORY) {
                                     messageContent.append("\n");
-                                    message.append(channel.getName());
+                                    messageContent.append("" + channel.getName());
                                     messageContent.append((" ").repeat(25 - (channel.getName().length())));
 
                                     String channelType = "";
@@ -439,10 +439,10 @@ public class MessageListener implements MessageCreateListener {
                             }
 
                             if (!error) {
-                                DBChannelArray channelArray = DBServer.getServer(ServerID).getChannels();
+                                if (!channelName.equals("")) {
+                                    DBChannelArray channelArray = DBServer.getServer(ServerID).getChannels();
 
-                                for (int i = 0; i < channelArray.count(); i++) {
-                                    if (channelArray.getChannel(i).getChannelName().equals(channelName)) {
+                                    if (channelArray.getChannel(channelID).getChannelName().equals(channelName)) {
                                         error = true;
                                         System.out.println("Error: ChannelName exist already in DB!");
                                         errorMessageWithReaction(", der ChannelName ist schon vergeben! (Tipp: " + Prefix + "info-channel-set)");
@@ -452,7 +452,7 @@ public class MessageListener implements MessageCreateListener {
 
                             if (!error) {
                                 UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
-                                DBServer.getServer(ServerID).getChannels().updateChannelName(channelID, channelName);
+                                DBServer.getServer(ServerID).getChannels().getChannel(channelID).updateChannelName(channelName);
                                 DatabaseConnection.DBUpdateItem(ServerID + "_Channel", DBServer.getServer(ServerID).getChannels().getChannel(channelID).getDB_ID(), "`channelName` = '" + channelName + "'");
                             }
 
@@ -499,10 +499,10 @@ public class MessageListener implements MessageCreateListener {
                             }
 
                             if (!error) {
-                                DBRoleArray rolesArray = DBServer.getServer(ServerID).getRoles();
+                                if (!roleName.equals("") && !roleType.equals("")) {
+                                    DBRoleArray rolesArray = DBServer.getServer(ServerID).getRoles();
 
-                                for (int i = 0; i < rolesArray.count(); i++) {
-                                    if (rolesArray.getRole(i).getRoleName().equals(roleName)) {
+                                    if (rolesArray.getRole(roleID).getRoleName().equals(roleName)) {
                                         error = true;
                                         System.out.println("Error: RoleName exist already in DB!");
                                         errorMessageWithReaction(", der RoleName ist schon vergeben! (Tipp: " + Prefix + "info-role-set)");
@@ -514,8 +514,8 @@ public class MessageListener implements MessageCreateListener {
                                 UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
                                 DBServer.getServer(ServerID).getRoles().getRole(roleID).updateRoleType(roleType);
                                 DBServer.getServer(ServerID).getRoles().getRole(roleID).updateRoleName(roleName);
-                                DatabaseConnection.DBUpdateItem(Server.getId() + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleType` = '" + roleType + "'");
-                                DatabaseConnection.DBUpdateItem(Server.getId() + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleName` = '" + roleName + "'");
+                                DatabaseConnection.DBUpdateItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleType` = '" + roleType + "'");
+                                DatabaseConnection.DBUpdateItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleName` = '" + roleName + "'");
                             }
 
                             Functions.messageDelete(UserMessage, 2500);
@@ -525,17 +525,17 @@ public class MessageListener implements MessageCreateListener {
                     } else {
                         normalCommands();
                     }
-                } else if (UserMessageContent.startsWith(DBServer.getServer(Server.getId()).getMusicBotPrefix())) {
-                    if (DBServer.getServer(Server.getId()).getChannels().getChannel("musicbot") != null) {
-                        long musicbotChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("musicbot").getChannelID();
+                } else if (UserMessageContent.startsWith(DBServer.getServer(ServerID).getMusicBotPrefix())) {
+                    if (DBServer.getServer(ServerID).getChannels().getChannel("musicbot") != null) {
+                        long musicbotChannelID = DBServer.getServer(ServerID).getChannels().getChannel("musicbot").getChannelID();
                         if (UserMessage.getChannel().getId() == musicbotChannelID) {
                             Functions.messageDelete(UserMessage, 45000);
                         }
                     }
                 }
             } else if (!UserMessage.getUserAuthor().get().isYourself() && UserMessage.getUserAuthor().get().isBot()) {
-                if (DBServer.getServer(Server.getId()).getChannels().getChannel("musicbot") != null) {
-                    long musicbotChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("musicbot").getChannelID();
+                if (DBServer.getServer(ServerID).getChannels().getChannel("musicbot") != null) {
+                    long musicbotChannelID = DBServer.getServer(ServerID).getChannels().getChannel("musicbot").getChannelID();
                     if (UserMessage.getChannel().getId() == musicbotChannelID) {
                         Functions.messageDelete(UserMessage, 45000);
                     }
@@ -661,7 +661,7 @@ public class MessageListener implements MessageCreateListener {
                     }
                 }
 
-                DBServer.getServer(ServerID).updateCommandTimeout(timestamp);
+                DBServer.getServer(ServerID).updateCommandTimeoutTimestamp(timestamp);
                 DatabaseConnection.DBUpdateItem("server", DBServer.getServer(ServerID).getDB_ID(), "`commandTimeout` = '" + timestamp + "'");
             } else {
                 UserMessage.addReaction(EmojiParser.parseToUnicode(":no_entry:"));
@@ -747,9 +747,9 @@ public class MessageListener implements MessageCreateListener {
         MessageBuilder message = null;
 
         if (admin) {
-            int AdminChannelID_Cache = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
+            int AdminChannelID_Cache = DBServer.getServer(ServerID).getChannels().getChannel("admin").getID();
             if (AdminChannelID_Cache > -1) {
-                long AdminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel(AdminChannelID_Cache).getChannelID();
+                long AdminChannelID = DBServer.getServer(ServerID).getChannels().getChannel(AdminChannelID_Cache).getChannelID();
                 textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
             }
 

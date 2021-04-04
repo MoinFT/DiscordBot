@@ -1,5 +1,6 @@
 package de.moinFT.main;
 
+import de.moinFT.main.Server.PortListener;
 import de.moinFT.main.listener.*;
 import de.moinFT.utils.DBServerArray;
 import de.moinFT.utils.Privates;
@@ -8,16 +9,30 @@ import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
 import org.javacord.api.entity.permission.Permissions;
 
+import java.io.IOException;
+
 import static de.moinFT.main.Functions.*;
+import static de.moinFT.utils.Privates.CommandPort;
+import static de.moinFT.utils.Privates.GetDataPort;
 
 public class Main {
     public static DBServerArray DBServer;
     public static DiscordApi client;
 
     public static void main(String[] args) {
-        try {
+        /*try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
+            e.printStackTrace();
+        }*/
+
+        try {
+            Thread t;
+            t = new PortListener(CommandPort);
+            t.start();
+            t = new PortListener(GetDataPort);
+            t.start();
+        } catch (IOException e) {
             e.printStackTrace();
         }
 

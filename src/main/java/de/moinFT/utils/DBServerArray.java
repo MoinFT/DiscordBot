@@ -4,7 +4,9 @@ public class DBServerArray {
     private int ID;
     private int DB_ID;
     private long ServerID;
-    private long CommandTimeout;
+    private String DiscordServerName;
+    private long CommandTimeoutTimestamp;
+    private int CommandTimeout;
     private String Prefix;
     private String MusicBotPrefix;
     private DBUserArray Users;
@@ -18,6 +20,8 @@ public class DBServerArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.ServerID = 0;
+        this.DiscordServerName = "";
+        this.CommandTimeoutTimestamp = 0;
         this.CommandTimeout = 0;
         this.Prefix = "";
         this.MusicBotPrefix = "";
@@ -29,10 +33,12 @@ public class DBServerArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long ServerID, long CommandTimeout, String Prefix, String MusicBotPrefix) {
+    public void setData(int DB_ID, long ServerID, String DiscordServerName, long CommandTimeoutTimestamp, int CommandTimeout, String Prefix, String MusicBotPrefix) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.ServerID = ServerID;
+            this.DiscordServerName = DiscordServerName;
+            this.CommandTimeoutTimestamp = CommandTimeoutTimestamp;
             this.CommandTimeout = CommandTimeout;
             this.Prefix = Prefix;
             this.MusicBotPrefix = MusicBotPrefix;
@@ -44,7 +50,7 @@ public class DBServerArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, ServerID, CommandTimeout, Prefix, MusicBotPrefix);
+            this.follower.setData(DB_ID, ServerID, DiscordServerName, CommandTimeoutTimestamp, CommandTimeout, Prefix, MusicBotPrefix);
         }
     }
 
@@ -53,6 +59,8 @@ public class DBServerArray {
             if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.ServerID = this.follower.ServerID;
+                this.DiscordServerName = this.follower.DiscordServerName;
+                this.CommandTimeoutTimestamp = this.follower.CommandTimeoutTimestamp;
                 this.CommandTimeout = this.follower.CommandTimeout;
                 this.Prefix = this.follower.Prefix;
                 this.MusicBotPrefix = this.follower.MusicBotPrefix;
@@ -62,6 +70,8 @@ public class DBServerArray {
             } else {
                 this.DB_ID = 0;
                 this.ServerID = 0;
+                this.DiscordServerName = "";
+                this.CommandTimeoutTimestamp = 0;
                 this.CommandTimeout = 0;
                 this.Prefix = "";
                 this.MusicBotPrefix = "";
@@ -112,12 +122,24 @@ public class DBServerArray {
         return this.ServerID;
     }
 
-    public void updateCommandTimeout(long CommandTimeout) {
-        this.CommandTimeout = CommandTimeout;
+    public String getDiscordServerName() {
+        return this.DiscordServerName;
     }
 
     public long getCommandTimeout() {
         return this.CommandTimeout;
+    }
+
+    public void updateCommandTimeout(int CommandTimeout) {
+        this.CommandTimeout = CommandTimeout;
+    }
+
+    public void updateCommandTimeoutTimestamp(long CommandTimeoutTimestamp) {
+        this.CommandTimeoutTimestamp = CommandTimeoutTimestamp;
+    }
+
+    public long getCommandTimeoutTimestamp() {
+        return this.CommandTimeoutTimestamp;
     }
 
     public String getPrefix() {

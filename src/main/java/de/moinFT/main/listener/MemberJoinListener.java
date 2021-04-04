@@ -17,6 +17,7 @@ public class MemberJoinListener implements ServerMemberJoinListener {
     private long ServerID = 0;
     private User User = null;
     private long UserID = 0;
+    private String DiscordUserName = "";
 
     @Override
     public void onServerMemberJoin(ServerMemberJoinEvent event) {
@@ -24,6 +25,7 @@ public class MemberJoinListener implements ServerMemberJoinListener {
         ServerID = Server.getId();
         User = event.getUser();
         UserID = User.getId();
+        DiscordUserName = User.getName();
 
         if (!User.isBot()) {
             int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
@@ -41,15 +43,15 @@ public class MemberJoinListener implements ServerMemberJoinListener {
         boolean botPermission = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User) || UserID == Privates.MyUserID;
 
         if (isAdmin) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'true', 'true')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + UserID + "', '" + DiscordUserName + "', 'true', 'true')");
         } else if (UserID == Privates.MyUserID) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'false', 'true')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + UserID + "', '" + DiscordUserName + "', 'false', 'true')");
         } else {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + UserID + "', 'false', 'false')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + UserID + "', '" + DiscordUserName + "', 'false', 'false')");
         }
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_User", "userID", String.valueOf(UserID));
 
-        DBServer.getServer(ServerID).getUsers().setData(DB_ID, UserID, isAdmin, botPermission);
+        DBServer.getServer(ServerID).getUsers().setData(DB_ID, UserID, DiscordUserName, isAdmin, botPermission);
     }
 }

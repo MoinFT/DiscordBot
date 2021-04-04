@@ -14,6 +14,7 @@ public class RCreateListener implements RoleCreateListener {
     private long ServerID = 0;
     private Role Role = null;
     private long RoleID = 0;
+    private String DiscordRoleName = "";
 
     @Override
     public void onRoleCreate(RoleCreateEvent event) {
@@ -21,11 +22,12 @@ public class RCreateListener implements RoleCreateListener {
         ServerID = Server.getId();
         Role = event.getRole();
         RoleID = Role.getId();
+        DiscordRoleName = Role.getName();
 
         DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `roleType`, `roleName`)", "('" + RoleID + "', '', '')");
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_Role", "roleID", String.valueOf(RoleID));
 
-        DBServer.getServer(ServerID).getRoles().setData(DB_ID, RoleID, "", "");
+        DBServer.getServer(ServerID).getRoles().setData(DB_ID, RoleID, DiscordRoleName, "", "");
     }
 }

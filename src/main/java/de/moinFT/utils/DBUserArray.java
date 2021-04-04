@@ -4,6 +4,7 @@ public class DBUserArray {
     private int ID;
     private int DB_ID;
     private long UserID;
+    private String DiscordUserName;
     private boolean IsAdmin;
     private boolean BotPermission;
 
@@ -14,16 +15,19 @@ public class DBUserArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.UserID = 0;
+        this.DiscordUserName = "";
+        this.IsAdmin = false;
         this.BotPermission = false;
 
         this.free = true;
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long UserID, boolean IsAdmin, boolean BotPermission) {
+    public void setData(int DB_ID, long UserID, String DiscordUserName, boolean IsAdmin, boolean BotPermission) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.UserID = UserID;
+            this.DiscordUserName = DiscordUserName;
             this.IsAdmin = IsAdmin;
             this.BotPermission = BotPermission;
 
@@ -34,7 +38,7 @@ public class DBUserArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, UserID, IsAdmin, BotPermission);
+            this.follower.setData(DB_ID, UserID, DiscordUserName, IsAdmin, BotPermission);
         }
     }
 
@@ -43,10 +47,14 @@ public class DBUserArray {
             if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.UserID = this.follower.UserID;
+                this.DiscordUserName = this.follower.DiscordUserName;
+                this.IsAdmin = this.follower.IsAdmin;
                 this.BotPermission = this.follower.BotPermission;
             } else {
                 this.DB_ID = 0;
                 this.UserID = 0;
+                this.DiscordUserName = "";
+                this.IsAdmin = false;
                 this.BotPermission = false;
 
                 this.free = true;
@@ -63,10 +71,14 @@ public class DBUserArray {
             if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.UserID = this.follower.UserID;
+                this.DiscordUserName = this.follower.DiscordUserName;
+                this.IsAdmin = this.follower.IsAdmin;
                 this.BotPermission = this.follower.BotPermission;
             } else {
                 this.DB_ID = 0;
                 this.UserID = 0;
+                this.DiscordUserName = "";
+                this.IsAdmin = false;
                 this.BotPermission = false;
 
                 this.free = true;
@@ -108,6 +120,10 @@ public class DBUserArray {
 
     public long getUserID() {
         return this.UserID;
+    }
+
+    public String getDiscordUserName() {
+        return this.DiscordUserName;
     }
 
     public void updateIsAdmin(boolean IsAdmin) {
