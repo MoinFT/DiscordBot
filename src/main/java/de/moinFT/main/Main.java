@@ -11,7 +11,6 @@ import org.javacord.api.entity.permission.Permissions;
 
 import java.io.IOException;
 
-import static de.moinFT.main.Functions.*;
 import static de.moinFT.utils.Privates.CommandPort;
 import static de.moinFT.utils.Privates.GetDataPort;
 
@@ -20,11 +19,11 @@ public class Main {
     public static DiscordApi client;
 
     public static void main(String[] args) {
-        /*try {
+        try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
 
         try {
             Thread t;
@@ -50,12 +49,12 @@ public class Main {
 
         client.updateActivity(ActivityType.LISTENING, "!help");
 
-        compareDBServer_WithServer();
+        Functions.compareDBServer_WithServer();
 
         for (int i = 0; i < DBServer.count(); i++) {
-            compareDBUser_WithGuildUser(i);
-            compareDBRole_WithGuildRole(i);
-            compareDBChannel_WithGuildChannel(i);
+            Functions.compareDBUser_WithGuildUser(i);
+            Functions.compareDBRole_WithGuildRole(i);
+            Functions.compareDBChannel_WithGuildChannel(i);
         }
 
         client.addServerJoinListener(new SJoinListener());

@@ -107,11 +107,11 @@ public class MessageListener implements MessageCreateListener {
                             StringBuilder messageContent = new StringBuilder();
 
                             messageContent.append("Username");
-                            messageContent.append((" ").repeat(20 - ("Username").length()));
+                            messageContent.append(Functions.createSpaces(20 - ("Username").length()));
                             messageContent.append("Nickname");
-                            messageContent.append((" ").repeat(20 - ("Nickname").length()));
+                            messageContent.append(Functions.createSpaces(20 - ("Nickname").length()));
                             messageContent.append("Bot-Berechtigungen");
-                            messageContent.append((" ").repeat(22 - ("Bot-Berechtigungen").length()));
+                            messageContent.append(Functions.createSpaces(22 - ("Bot-Berechtigungen").length()));
                             messageContent.append("Admin-Berechtigungen");
                             message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
                             messageContent = new StringBuilder();
@@ -122,17 +122,17 @@ public class MessageListener implements MessageCreateListener {
                                 if (DBServer.getServer(ServerID).getUsers().getUser(user.getId()).getBotPermission()) {
                                     messageContent.append("\n");
                                     messageContent.append(user.getName());
-                                    messageContent.append(" ".repeat(20 - user.getName().length()));
+                                    messageContent.append(Functions.createSpaces(20 - user.getName().length()));
 
                                     if (!user.getDisplayName(Server).equals(user.getName())) {
                                         messageContent.append(user.getDisplayName(Server));
-                                        messageContent.append((" ").repeat(22 - user.getDisplayName(Server).length()));
+                                        messageContent.append(Functions.createSpaces(22 - user.getDisplayName(Server).length()));
                                     } else {
-                                        messageContent.append((" ").repeat(22));
+                                        messageContent.append(Functions.createSpaces(22));
                                     }
 
                                     messageContent.append(EmojiParser.parseToUnicode(":white_check_mark:"));
-                                    messageContent.append((" ").repeat(20));
+                                    messageContent.append(Functions.createSpaces(20));
 
                                     if (DBServer.getServer(ServerID).getUsers().getUser(user.getId()).getIsAdmin()) {
                                         messageContent.append(EmojiParser.parseToUnicode(":white_check_mark:"));
@@ -159,13 +159,13 @@ public class MessageListener implements MessageCreateListener {
                             StringBuilder messageContent = new StringBuilder();
 
                             messageContent.append("Username");
-                            messageContent.append((" ").repeat(20 - ("Username").length()));
+                            messageContent.append(Functions.createSpaces(20 - ("Username").length()));
                             messageContent.append("Nickname");
-                            messageContent.append((" ").repeat(20 - ("Nickname").length()));
+                            messageContent.append(Functions.createSpaces(20 - ("Nickname").length()));
                             messageContent.append("Bot-Berechtigungen");
-                            messageContent.append((" ").repeat(22 - ("Bot-Berechtigungen").length()));
+                            messageContent.append(Functions.createSpaces(22 - ("Bot-Berechtigungen").length()));
                             messageContent.append("Admin-Berechtigungen");
-                            messageContent.append((" ").repeat(22 - ("Admin-Berechtigungen").length()));
+                            messageContent.append(Functions.createSpaces(22 - ("Admin-Berechtigungen").length()));
                             messageContent.append("Hoechste Rolle");
                             message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
 
@@ -193,13 +193,13 @@ public class MessageListener implements MessageCreateListener {
                                 User user = users.next();
                                 if ((userStartIndex - 1) < count && (userStartIndex + userPerPage) > count) {
                                     messageContent.append("\n").append(user.getName());
-                                    messageContent.append(" ".repeat(Math.max(0, 20 - user.getName().length())));
+                                    messageContent.append(Functions.createSpaces(20 - user.getName().length()));
 
                                     if (!user.getDisplayName(Server).equals(user.getName())) {
                                         messageContent.append(user.getDisplayName(Server));
-                                        messageContent.append((" ").repeat(22 - user.getDisplayName(Server).length()));
+                                        messageContent.append(Functions.createSpaces(22 - user.getDisplayName(Server).length()));
                                     } else {
-                                        messageContent.append((" ").repeat(22));
+                                        messageContent.append(Functions.createSpaces(22));
                                     }
 
                                     if (DBServer.getServer(ServerID).getUsers().getUser(user.getId()).getBotPermission()) {
@@ -208,7 +208,7 @@ public class MessageListener implements MessageCreateListener {
                                         messageContent.append(EmojiParser.parseToUnicode(":x:"));
                                     }
 
-                                    messageContent.append((" ").repeat(20));
+                                    messageContent.append(Functions.createSpaces(20));
 
                                     if (DBServer.getServer(ServerID).getUsers().getUser(user.getId()).getIsAdmin()) {
                                         messageContent.append(EmojiParser.parseToUnicode(":white_check_mark:"));
@@ -216,7 +216,7 @@ public class MessageListener implements MessageCreateListener {
                                         messageContent.append(EmojiParser.parseToUnicode(":x:"));
                                     }
 
-                                    messageContent.append((" ").repeat(20));
+                                    messageContent.append(Functions.createSpaces(20));
 
                                     Iterator<Role> roles = user.getRoles(Server).iterator();
                                     Role highestRole = null;
@@ -256,9 +256,9 @@ public class MessageListener implements MessageCreateListener {
                             StringBuilder messageContent = new StringBuilder();
 
                             messageContent.append("Channel-Name");
-                            messageContent.append((" ").repeat(25 - ("Channel-Name").length()));
+                            messageContent.append(Functions.createSpaces(25 - ("Channel-Name").length()));
                             messageContent.append("Channel-Type");
-                            messageContent.append((" ").repeat(25 - ("Channel-Type").length()));
+                            messageContent.append(Functions.createSpaces(25 - ("Channel-Type").length()));
                             messageContent.append("Channel-Setup Name");
                             message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
                             messageContent = new StringBuilder();
@@ -268,8 +268,8 @@ public class MessageListener implements MessageCreateListener {
 
                                 if (channel.getType() != ChannelType.CHANNEL_CATEGORY) {
                                     messageContent.append("\n");
-                                    messageContent.append("" + channel.getName());
-                                    messageContent.append((" ").repeat(25 - (channel.getName().length())));
+                                    messageContent.append(channel.getName());
+                                    messageContent.append(Functions.createSpaces(25 - (channel.getName().length())));
 
                                     String channelType = "";
                                     if (channel.getType() == ChannelType.SERVER_TEXT_CHANNEL) {
@@ -279,7 +279,7 @@ public class MessageListener implements MessageCreateListener {
                                     }
 
                                     messageContent.append(channelType);
-                                    messageContent.append((" ").repeat(25 - (channelType.length())));
+                                    messageContent.append(Functions.createSpaces(25 - (channelType.length())));
 
                                     if (!DBServer.getServer(ServerID).getChannels().getChannel(channel.getId()).getChannelName().equals("")) {
                                         messageContent.append(DBServer.getServer(ServerID).getChannels().getChannel(channel.getId()).getChannelName());
@@ -306,9 +306,9 @@ public class MessageListener implements MessageCreateListener {
                             StringBuilder messageContent = new StringBuilder();
 
                             messageContent.append("Role-Name");
-                            messageContent.append((" ").repeat(25 - ("Role-Name").length()));
+                            messageContent.append(Functions.createSpaces(25 - ("Role-Name").length()));
                             messageContent.append("Role-Type");
-                            messageContent.append((" ").repeat(25 - ("Role-Type").length()));
+                            messageContent.append(Functions.createSpaces(25 - ("Role-Type").length()));
                             messageContent.append("Role-Setup Name");
 
                             message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
@@ -318,7 +318,7 @@ public class MessageListener implements MessageCreateListener {
                                 Role role = roles.next();
                                 messageContent.append("\n");
                                 messageContent.append(role.getName());
-                                messageContent.append((" ").repeat(25 - (role.getName().length())));
+                                messageContent.append(Functions.createSpaces(25 - (role.getName().length())));
 
                                 String roleType = DBServer.getServer(ServerID).getRoles().getRole(role.getId()).getRoleType();
                                 if (!roleType.equals("")) {
@@ -327,7 +327,7 @@ public class MessageListener implements MessageCreateListener {
                                     messageContent.append(EmojiParser.parseToUnicode(":x:"));
                                 }
 
-                                messageContent.append((" ").repeat(25 - (roleType.length())));
+                                messageContent.append(Functions.createSpaces(25 - (roleType.length())));
 
                                 String roleSetupName = DBServer.getServer(ServerID).getRoles().getRole(role.getId()).getRoleName();
                                 if (!roleSetupName.equals("")) {
@@ -798,7 +798,7 @@ public class MessageListener implements MessageCreateListener {
             String messageCommand = Prefix + normalCommands[x];
             String messageHelp = normalHelpMessage[x];
             messageContentBuilder.append(messageCommand);
-            messageContentBuilder.append((" ").repeat(30 - messageCommand.length()));
+            messageContentBuilder.append(Functions.createSpaces(30 - messageCommand.length()));
             messageContentBuilder.append(messageHelp);
         }
 
@@ -817,7 +817,7 @@ public class MessageListener implements MessageCreateListener {
             String messageCommand = Prefix + commands[x];
             String messageHelp = helpContent[x];
             messageContent.append(messageCommand);
-            messageContent.append((" ").repeat(space - messageCommand.length()));
+            messageContent.append(Functions.createSpaces(space - messageCommand.length()));
             messageContent.append(messageHelp);
         }
         return messageContent.toString();
