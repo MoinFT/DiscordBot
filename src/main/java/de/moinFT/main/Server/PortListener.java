@@ -43,9 +43,9 @@ public class PortListener extends Thread {
                     String discordBotArguments;
 
                     try {
-                        discordServerID = Long.parseLong(input.split("-")[0]);
-                        discordBotCommand = input.split("-")[1];
-                        discordBotArguments = input.split("-")[2];
+                        discordServerID = Long.parseLong(input.split("%")[0]);
+                        discordBotCommand = input.split("%")[1];
+                        discordBotArguments = input.split("%")[2];
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                         break;

@@ -3,6 +3,7 @@ package de.moinFT.main.listener;
 import com.vdurmont.emoji.EmojiParser;
 import de.moinFT.main.DatabaseConnection;
 import de.moinFT.main.Functions;
+import de.moinFT.main.RKICorona;
 import de.moinFT.utils.DBChannelArray;
 import de.moinFT.utils.DBRoleArray;
 import org.javacord.api.entity.channel.*;
@@ -21,7 +22,6 @@ import org.javacord.api.listener.message.MessageCreateListener;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.ListIterator;
 import java.util.concurrent.ExecutionException;
 
 import static de.moinFT.main.Functions.getUserHighestRole;
@@ -48,6 +48,8 @@ public class MessageListener implements MessageCreateListener {
         Prefix = DBServer.getServer(ServerID).getPrefix();
 
         if (UserMessage.isServerMessage()) {
+            TextChannel channelMessage = event.getChannel().asTextChannel().get();
+
             TextChannel textChannel;
 
             DBChannelArray DBAdminChannel = DBServer.getServer(ServerID).getChannels().getChannel("admin");
@@ -55,13 +57,13 @@ public class MessageListener implements MessageCreateListener {
                 long adminChannelID = DBAdminChannel.getChannelID();
                 textChannel = Server.getChannelById(adminChannelID).get().asTextChannel().get();
             } else {
-                textChannel = UserMessage.getChannel();
+                textChannel = channelMessage;
             }
 
-            if (!UserMessage.getUserAuthor().get().isYourself() && !UserMessage.getUserAuthor().get().isBot()) {
+            if (!UserMessage.getAuthor().isYourself() && !UserMessage.getUserAuthor().get().isBot()) {
                 if (UserMessageContent.startsWith(Prefix)) {
                     //ServerAdmin
-                    if (event.getMessageAuthor().isServerAdmin()) {
+                    if (UserMessage.getAuthor().isServerAdmin()) {
                         if (UserMessageContent.startsWith(Prefix + "toggle-bot-permission")) {
                             User user = getFirstUser_FromMessage(1, UserMessage);
 
@@ -69,7 +71,7 @@ public class MessageListener implements MessageCreateListener {
                                 long userID = user.getId();
                                 boolean botPermission = DBServer.getServer(ServerID).getUsers().getUser(userID).getBotPermission();
 
-                                if (userID != UserMessage.getUserAuthor().get().getId()) {
+                                if (userID != UserMessage.getAuthor().getId()) {
                                     UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
 
                                     int adminChannelID = DBServer.getServer(ServerID).getChannels().getChannel("admin").getID();
@@ -180,7 +182,7 @@ public class MessageListener implements MessageCreateListener {
                             int pageNumber = 1;
                             if (pages != 1 && !pageCommand.equals("")) {
                                 try {
-                                    pageNumber = Integer.parseInt(pageCommand.split(" ")[1]);
+                                    pageNumber = parseInt(pageCommand.split(" ")[1]);
                                 } catch (Exception e) {
                                     System.out.println("Error: No pageNumber found in th message!");
                                 }
@@ -350,7 +352,7 @@ public class MessageListener implements MessageCreateListener {
                             }
 
                             try {
-                                event.getChannel().bulkDelete(event.getChannel().getMessages(MessValue).get());
+                                channelMessage.bulkDelete(channelMessage.getMessages(MessValue).get());
                             } catch (InterruptedException | ExecutionException e) {
                                 System.out.println("Error: Messages couldn't be deleted (check Permissions)!");
                                 errorMessageWithReaction(", die Nachrichten konnten nicht gelöscht werden! (Bot Berechtigungen prüfen)");
@@ -519,12 +521,9 @@ public class MessageListener implements MessageCreateListener {
                             }
 
                             Functions.messageDelete(UserMessage, 2500);
-                        } else if (UserMessageContent.startsWith(Prefix + "help")) {
-                            getHelpMessage(true);
                         }
-                    } else {
-                        normalCommands();
                     }
+                    normalCommands();
                 } else if (UserMessageContent.startsWith(DBServer.getServer(ServerID).getMusicBotPrefix())) {
                     if (DBServer.getServer(ServerID).getChannels().getChannel("musicbot") != null) {
                         long musicbotChannelID = DBServer.getServer(ServerID).getChannels().getChannel("musicbot").getChannelID();
@@ -551,10 +550,8 @@ public class MessageListener implements MessageCreateListener {
             int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
 
             if (DBRoleCount > 0) {
-                ListIterator<Role> userRoles = UserMessage.getUserAuthor().get().getRoles(Server).listIterator();
 
-                while (userRoles.hasNext()) {
-                    Role userRole = userRoles.next();
+                for (Role userRole : UserMessage.getUserAuthor().get().getRoles(Server)) {
                     for (int i = 0; i < DBRoleCount; i++) {
                         if (DBServer.getServer(ServerID).getRoles().getRole(i).getRoleType().equalsIgnoreCase("color")) {
                             if (userRole.getId() == DBServer.getServer(ServerID).getRoles().getRole(i).getRoleID()) {
@@ -668,8 +665,12 @@ public class MessageListener implements MessageCreateListener {
             }
 
             Functions.messageDelete(UserMessage, 2500);
+        } else if (UserMessageContent.startsWith(Prefix + "corona")) {
+            UserMessage.getChannel().sendMessage("Aktueller Inzidenzwert (Nienburg (Weser)): " + RKICorona.incidenceValue());
+
+            Functions.messageDelete(UserMessage, 500);
         } else if (UserMessageContent.startsWith(Prefix + "help")) {
-            getHelpMessage(false);
+            getHelpMessage(UserMessage.getAuthor().isServerAdmin());
         }
     }
 
@@ -727,6 +728,7 @@ public class MessageListener implements MessageCreateListener {
 
         String[] normalCommands = {
                 "help",
+                "corona",
                 "info-user [UserMention]",
                 "info-server",
                 "m-a",
@@ -736,6 +738,7 @@ public class MessageListener implements MessageCreateListener {
 
         String[] normalHelpMessage = {
                 "Diese Liste",
+                "Gibt den aktuellen Inzidenzwert von Nienburg (Weser) aus.",
                 "Zeigt Informationen über den User [UserMention] an.",
                 "Zeigt Informationen über den Server an.",
                 "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)",
