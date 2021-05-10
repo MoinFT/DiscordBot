@@ -44,7 +44,13 @@ public class Functions {
                     if (message.getChannel().getId() != DBServer.getServer(server.getId()).getChannels().getChannel("info").getChannelID()) {
                         Thread.sleep(timeout);
                         message.delete();
+                    } else if (!message.getAuthor().isBotUser()) {
+                        Thread.sleep(timeout);
+                        message.delete();
                     }
+                } else {
+                    Thread.sleep(timeout);
+                    message.delete();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

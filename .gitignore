@@ -3,7 +3,7 @@
 /.idea/
 /gradle/
 /out/
-/src/main/resources
+/src/main/resources/META-INF
 
 !/src/main/java/de/moinFT/utils/*
 /src/main/java/de/moinFT/utils/Privates.java

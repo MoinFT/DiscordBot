@@ -2,6 +2,7 @@ package de.moinFT.main.listener;
 
 import com.vdurmont.emoji.EmojiParser;
 import de.moinFT.main.DatabaseConnection;
+import de.moinFT.main.FileIn;
 import de.moinFT.main.Functions;
 import de.moinFT.main.RKICorona;
 import de.moinFT.utils.DBChannelArray;
@@ -18,6 +19,8 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.message.MessageCreateEvent;
 import org.javacord.api.listener.message.MessageCreateListener;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.time.ZoneId;
 import java.util.Date;
@@ -30,7 +33,6 @@ import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
 public class MessageListener implements MessageCreateListener {
-
     private Server Server = null;
     private long ServerID = 0;
     private long commandTimeout = 0;
@@ -670,61 +672,18 @@ public class MessageListener implements MessageCreateListener {
 
             Functions.messageDelete(UserMessage, 500);
         } else if (UserMessageContent.startsWith(Prefix + "help")) {
-            getHelpMessage(UserMessage.getAuthor().isServerAdmin());
+            getHelpMessage(DBServer.getServer(ServerID).getUsers().getUser(UserMessage.getAuthor().getId()).getBotPermission());
         }
     }
 
     private void getHelpMessage(boolean admin) {
+        Functions.messageDelete(UserMessage, 500);
+
+        String StringHelp = FileIn.read("/json/help.json");
+        JSONObject JSONHelp = new JSONObject(StringHelp).getJSONObject("attributes");
+
         String colorInfoString = getColorInfoString();
         TextChannel textChannel = UserMessage.getChannel();
-
-        String[] botPermCommands = {
-                "help-all",
-                "help-set",
-                "clear [Wert]",
-                "add-role [UserMention] [RoleMention]",
-                "remove-role [UserMention] [RoleMention]",
-                "info-role-set",
-                "info-channel-set",
-                "info-user-set (-page [page])",
-                "info-bot-permission"
-        };
-
-        String[] botPermHelpMessage = {
-                "Diese Liste",
-                "Bot-Befehle (Bot Variablen setzen)",
-                "Loescht [Wert] Nachrichten aus einem TextChannel",
-                "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]",
-                "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]",
-                "Gibt Auskunft ueber dem Bot zugewiesene Rollen",
-                "Gibt Auskunft ueber dem Bot zugewiesene Kanaele",
-                "Gibt Auskunft ueber Nutzer",
-                "Gibt Auskunft ueber Nutzer mit Bot Berechtigung"
-        };
-
-        String[] botVarSetCommands = {
-                "help-set",
-                "channel-set [channelMention] [channelName]",
-                "role-set [roleMention] [roleType] [roleName]"
-        };
-
-        String[] botVarSetHelpMessage = {
-                "Diese Liste",
-                "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu.\n" +
-                        "                                                       " +
-                        "Fuer Admin (Beispiel): !channel-set #admin admin",
-                "Fuegt einer Rolle [roleMention] einen Typ [roleType] und einen Namen [roleName] hinzu.\n" +
-                        "                                                       " +
-                        "Fuer eine Farbe (Beispiel): !role-set @yellow color yellow"
-        };
-
-        String[] botPermAdminCommands = {
-                "toggle-permission-bot [UserMention]"
-        };
-
-        String[] botPermAdminHelpMessage = {
-                "Gibt/Nimmt dem Nutzer (UserID) die  Bot Berechtigungen"
-        };
 
         String[] normalCommands = {
                 "help",
@@ -750,10 +709,12 @@ public class MessageListener implements MessageCreateListener {
         MessageBuilder message = null;
 
         if (admin) {
-            int AdminChannelID_Cache = DBServer.getServer(ServerID).getChannels().getChannel("admin").getID();
-            if (AdminChannelID_Cache > -1) {
-                long AdminChannelID = DBServer.getServer(ServerID).getChannels().getChannel(AdminChannelID_Cache).getChannelID();
-                textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
+            if (UserMessageContent.equalsIgnoreCase(Prefix + "help-all") || UserMessageContent.equalsIgnoreCase(Prefix + "help-set")) {
+                int AdminChannelID_Cache = DBServer.getServer(ServerID).getChannels().getChannel("admin").getID();
+                if (AdminChannelID_Cache > -1) {
+                    long AdminChannelID = DBServer.getServer(ServerID).getChannels().getChannel(AdminChannelID_Cache).getChannelID();
+                    textChannel = Server.getChannelById(AdminChannelID).get().asTextChannel().get();
+                }
             }
 
             if (UserMessageContent.equalsIgnoreCase(Prefix + "help-all")) {
@@ -762,17 +723,17 @@ public class MessageListener implements MessageCreateListener {
                 message.append("Bot-Befehle", MessageDecoration.CODE_LONG);
 
                 message.append("Normale-Befehle (Mit Bot-Berechtigungen)", MessageDecoration.CODE_LONG);
-                messageContent = createHelpMessage(botPermCommands, botPermHelpMessage, 45);
+                messageContent = createHelpMessage(JSONHelp.getJSONArray("botPerm"), 45);
                 message.append(messageContent, MessageDecoration.CODE_LONG);
 
                 message.append("Admin-Befehle (Mit Bot-Berechtigungen)", MessageDecoration.CODE_LONG);
-                messageContent = createHelpMessage(botPermAdminCommands, botPermAdminHelpMessage, 45);
+                messageContent = createHelpMessage(JSONHelp.getJSONArray("botPermAdmin"), 45);
                 message.append(messageContent, MessageDecoration.CODE_LONG);
             } else if (UserMessageContent.equalsIgnoreCase(Prefix + "help-set")) {
                 message = new MessageBuilder();
 
                 message.append("Bot-Befehle (Bot Variablen setzen)", MessageDecoration.CODE_LONG);
-                messageContent = createHelpMessage(botVarSetCommands, botVarSetHelpMessage, 50);
+                messageContent = createHelpMessage(JSONHelp.getJSONArray("botVarSet"), 50);
                 message.append(messageContent, MessageDecoration.CODE_LONG);
             }
         }
@@ -811,14 +772,15 @@ public class MessageListener implements MessageCreateListener {
         Functions.messageDelete(UserMessage, 500);
     }
 
-    private String createHelpMessage(String[] commands, String[] helpContent, int space) {
+    private String createHelpMessage(JSONArray help, int space) {
         StringBuilder messageContent = new StringBuilder();
 
-        for (int x = 0; x < commands.length; x++) {
+        for (int x = 0; x < help.length(); x++) {
+            JSONObject h = help.getJSONObject(x);
             messageContent.append("\n");
 
-            String messageCommand = Prefix + commands[x];
-            String messageHelp = helpContent[x];
+            String messageCommand = Prefix + h.getString("command");
+            String messageHelp = h.getString("message");
             messageContent.append(messageCommand);
             messageContent.append(Functions.createSpaces(space - messageCommand.length()));
             messageContent.append(messageHelp);
