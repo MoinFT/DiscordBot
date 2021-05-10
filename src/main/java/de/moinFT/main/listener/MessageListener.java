@@ -685,26 +685,6 @@ public class MessageListener implements MessageCreateListener {
         String colorInfoString = getColorInfoString();
         TextChannel textChannel = UserMessage.getChannel();
 
-        String[] normalCommands = {
-                "help",
-                "corona",
-                "info-user [UserMention]",
-                "info-server",
-                "m-a",
-                "color [color]",
-                "color"
-        };
-
-        String[] normalHelpMessage = {
-                "Diese Liste",
-                "Gibt den aktuellen Inzidenzwert von Nienburg (Weser) aus.",
-                "Zeigt Informationen über den User [UserMention] an.",
-                "Zeigt Informationen über den Server an.",
-                "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)",
-                colorInfoString,
-                "Farbe entfernen"
-        };
-
         String messageContent;
         MessageBuilder message = null;
 
@@ -738,49 +718,38 @@ public class MessageListener implements MessageCreateListener {
             }
         }
 
-        int startPosition = 0;
+        JSONArray normalHelp = JSONHelp.getJSONArray("normalHelp");
         if (message == null) {
             message = new MessageBuilder();
             message.append("Bot-Befehle", MessageDecoration.CODE_LONG);
         } else {
             message.append("Normale-Befehle (Ohne Bot-Brechtigungen)", MessageDecoration.CODE_LONG);
-            startPosition = 1;
+            normalHelp.remove(0);
         }
 
-        int commandLimit;
+        messageContent = createHelpMessage(normalHelp, 30);
+
         if (colorInfoString.length() != 0) {
-            commandLimit = normalCommands.length;
-        } else {
-            commandLimit = normalCommands.length - 2;
+            messageContent = messageContent + "\ncolor [color]                 " + colorInfoString;
+            messageContent = messageContent + "\ncolor                         Farbe entfernen";
         }
 
-        StringBuilder messageContentBuilder = new StringBuilder();
-
-        for (int x = startPosition; x < commandLimit; x++) {
-            messageContentBuilder.append("\n");
-
-            String messageCommand = Prefix + normalCommands[x];
-            String messageHelp = normalHelpMessage[x];
-            messageContentBuilder.append(messageCommand);
-            messageContentBuilder.append(Functions.createSpaces(30 - messageCommand.length()));
-            messageContentBuilder.append(messageHelp);
-        }
-
-        message.append(messageContentBuilder.toString(), MessageDecoration.CODE_LONG);
+        message.append(messageContent, MessageDecoration.CODE_LONG);
         textChannel.sendMessage(message.getStringBuilder().toString());
 
         Functions.messageDelete(UserMessage, 500);
     }
 
-    private String createHelpMessage(JSONArray help, int space) {
+    private String createHelpMessage(JSONArray json, int space) {
         StringBuilder messageContent = new StringBuilder();
 
-        for (int x = 0; x < help.length(); x++) {
-            JSONObject h = help.getJSONObject(x);
+        for (int x = 0; x < json.length(); x++) {
+            JSONObject temp = json.getJSONObject(x);
             messageContent.append("\n");
 
-            String messageCommand = Prefix + h.getString("command");
-            String messageHelp = h.getString("message");
+            String messageCommand = Prefix + temp.getString("command");
+            String messageHelp = temp.getString("message");
+
             messageContent.append(messageCommand);
             messageContent.append(Functions.createSpaces(space - messageCommand.length()));
             messageContent.append(messageHelp);

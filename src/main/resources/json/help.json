@@ -1,5 +1,27 @@
 {
   "attributes": {
+    "normalHelp": [
+      {
+        "command": "help",
+        "message": "Diese Liste"
+      },
+      {
+        "command": "corona",
+        "message": "Gibt den aktuellen Inzidenzwert von Nienburg (Weser) aus."
+      },
+      {
+        "command": "info-user [UserMention]",
+        "message": "Zeigt Informationen über den User [UserMention] an."
+      },
+      {
+        "command": "info-server",
+        "message": "Zeigt Informationen über den Server an."
+      },
+      {
+        "command": "m-a",
+        "message": "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)"
+      }
+    ],
     "botPerm": [
       {
         "command": "help-all",
