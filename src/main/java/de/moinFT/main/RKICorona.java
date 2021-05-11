@@ -1,5 +1,6 @@
 package de.moinFT.main;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.URI;
@@ -19,7 +20,8 @@ public class RKICorona {
                 .thenApply(HttpResponse::body)
                 .thenAccept((event) -> {
                     JSONObject allData = new JSONObject(event);
-                    JSONObject data = allData.getJSONObject("data").getJSONObject("03256").getJSONArray("history").getJSONObject(1);
+                    JSONArray dataHistory = allData.getJSONObject("data").getJSONObject("03256").getJSONArray("history");
+                    JSONObject data = dataHistory.getJSONObject(dataHistory.length() - 1);
 
                     Incidence = data.getDouble("weekIncidence");
                 })
