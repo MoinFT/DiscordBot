@@ -27,14 +27,14 @@ public class DatabaseConnection {
             res = statement.executeQuery("SELECT * FROM `server`");
 
             while (res.next()) {
-                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getString("discordServerName"), res.getLong("commandTimeoutTimestamp"), res.getInt("commandTimeout"), res.getString("prefix"), res.getString("musicBotPrefix"));
+                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getLong("commandTimeoutTimestamp"), res.getInt("commandTimeout"), res.getString("prefix"), res.getString("musicBotPrefix"));
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
                 res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_User`");
 
                 while (res.next()) {
-                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getString("discordUserName"), res.getBoolean("isAdmin"), res.getBoolean("botPermission"));
+                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getBoolean("isAdmin"), res.getBoolean("botPermission"));
                 }
             }
 
@@ -42,7 +42,7 @@ public class DatabaseConnection {
                 res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Role`");
 
                 while (res.next()) {
-                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getLong("roleID"), res.getString("discordRoleName"), res.getString("roleType"), res.getString("roleName"));
+                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
                 }
             }
 
@@ -50,7 +50,7 @@ public class DatabaseConnection {
                 res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Channel`");
 
                 while (res.next()) {
-                    DBServer.getServer(i).getChannels().setData(res.getInt("id"), res.getLong("channelID"), res.getString("discordChannelName"), res.getString("channelType"), res.getString("channelName"));
+                    DBServer.getServer(i).getChannels().setData(res.getInt("id"), res.getLong("channelID"), res.getString("channelType"), res.getString("channelName"));
                 }
             }
 

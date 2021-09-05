@@ -4,7 +4,6 @@ public class DBRoleArray {
     private int ID;
     private int DB_ID;
     private long RoleID;
-    private String DiscordRoleName;
     private String RoleName;
     private String RoleType;
 
@@ -15,7 +14,6 @@ public class DBRoleArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.RoleID = 0;
-        this.DiscordRoleName = "";
         this.RoleName = "";
         this.RoleType = "";
 
@@ -23,11 +21,10 @@ public class DBRoleArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long RoleID, String DiscordRoleName, String roleType, String roleName) {
+    public void setData(int DB_ID, long RoleID, String roleType, String roleName) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.RoleID = RoleID;
-            this.DiscordRoleName = DiscordRoleName;
             this.RoleName = roleName;
             this.RoleType = roleType;
 
@@ -38,7 +35,7 @@ public class DBRoleArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, RoleID, DiscordRoleName, roleType, roleName);
+            this.follower.setData(DB_ID, RoleID, roleType, roleName);
         }
     }
 
@@ -47,13 +44,11 @@ public class DBRoleArray {
             if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.RoleID = this.follower.RoleID;
-                this.DiscordRoleName = this.follower.DiscordRoleName;
                 this.RoleType = this.follower.RoleType;
                 this.RoleName = this.follower.RoleName;
             } else {
                 this.DB_ID = 0;
                 this.RoleID = 0;
-                this.DiscordRoleName = "";
                 this.RoleType = "";
                 this.RoleName = "";
 
@@ -100,10 +95,6 @@ public class DBRoleArray {
 
     public void updateRoleName(String roleName) {
             this.RoleName = roleName;
-    }
-
-    public String getDiscordRoleName() {
-        return this.DiscordRoleName;
     }
 
     public String getRoleName() {

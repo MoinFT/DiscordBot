@@ -8,7 +8,6 @@ import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.concurrent.ExecutionException;
 
@@ -227,15 +226,13 @@ public class Functions {
 
     public static void addServerToDB(Server Server) {
         long serverID = Server.getId();
-        String discordServerName = new String(Server.getName().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         System.out.println("Add Server to DB: " + serverID);
-        DatabaseConnection.DBAddItem("server", "(`serverID`, `discordServerName`, `commandTimeoutTimestamp`, `commandTimeout`, `prefix`, `musicBotPrefix`)", "('" + serverID + "', '" + discordServerName.replace("'", "~") + "', '0', '5000', '!', '-')");
+        DatabaseConnection.DBAddItem("server", "(`serverID`, `commandTimeoutTimestamp`, `commandTimeout`, `prefix`, `musicBotPrefix`)", "('" + serverID + "', '0', '5000', '!', '-')");
 
         DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_Channel` (" +
                 " `id` int(11) NOT NULL AUTO_INCREMENT," +
                 " `channelID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `discordChannelName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `channelType` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `channelName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " PRIMARY KEY (`id`)," +
@@ -244,7 +241,6 @@ public class Functions {
         DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_Role` (" +
                 " `id` int(11) NOT NULL AUTO_INCREMENT," +
                 " `roleID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `discordRoleName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `roleType` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `roleName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " PRIMARY KEY (`id`)," +
@@ -253,7 +249,6 @@ public class Functions {
         DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_User` (" +
                 " `id` int(11) NOT NULL AUTO_INCREMENT," +
                 " `userID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `discordUserName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `isAdmin` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " `botPermission` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
                 " PRIMARY KEY (`id`)," +
@@ -261,12 +256,11 @@ public class Functions {
                 ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
 
         int DB_ID = DatabaseConnection.DBGetDB_ID("server", "serverID", String.valueOf(serverID));
-        DBServer.setData(DB_ID, serverID, discordServerName, 0, 0, "!", "-");
+        DBServer.setData(DB_ID, serverID, 0, 0, "!", "-");
     }
 
     public static void addChannelToDB(long ServerID, ServerChannel Channel) {
         long channelID = Channel.getId();
-        String discordChannelName = new String(Channel.getName().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         String channelType;
         String channelName = "";
@@ -284,44 +278,42 @@ public class Functions {
         }
 
         System.out.println("Add Channel to DB: " + channelID);
-        DatabaseConnection.DBAddItem(ServerID + "_Channel", "(`channelID`, `discordChannelName`, `channelType`, `channelName`)", "('" + channelID + "', '" + discordChannelName.replace("'", "~") + "', '" + channelType + "', '" + channelName + "')");
+        DatabaseConnection.DBAddItem(ServerID + "_Channel", "(`channelID`, `channelType`, `channelName`)", "('" + channelID + "', '" + channelType + "', '" + channelName + "')");
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_Channel", "channelID", String.valueOf(channelID));
-        DBServer.getServer(ServerID).getChannels().setData(DB_ID, channelID, discordChannelName, channelType, channelName);
+        DBServer.getServer(ServerID).getChannels().setData(DB_ID, channelID, channelType, channelName);
     }
 
     public static void addRoleToDB(long ServerID, Role Role) {
         long roleID = Role.getId();
-        String discordRoleName = new String(Role.getName().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         System.out.println("Add Role to DB: " + roleID);
         if (Role.isEveryoneRole()) {
-            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `discordRoleName`, `roleName`, `roleType`)", "('" + roleID + "', '" + discordRoleName.replace("'", "~") + "', 'everyone', 'everyone')");
+            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `roleName`, `roleType`)", "('" + roleID + "', 'everyone', 'everyone')");
         } else {
-            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `discordRoleName`, `roleName`, `roleType`)", "('" + roleID + "', '" + discordRoleName.replace("'", "~") + "', '', '')");
+            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `roleName`, `roleType`)", "('" + roleID + "', '', '')");
         }
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_Role", "roleID", String.valueOf(roleID));
-        DBServer.getServer(ServerID).getRoles().setData(DB_ID, roleID, discordRoleName, "", "");
+        DBServer.getServer(ServerID).getRoles().setData(DB_ID, roleID, "", "");
     }
 
     public static void addUserToDB(long ServerID, User User) {
         long userID = User.getId();
-        String discordUsername = new String(User.getName().getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         System.out.println("Add User to DB: " + userID);
         boolean isAdmin = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User);
         boolean botPermission = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User) || userID == Privates.MyUserID;
 
         if (isAdmin) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + userID + "', '" + discordUsername.replace("'", "~") + "', 'true', 'true')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'true', 'true')");
         } else if (userID == Privates.MyUserID) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + userID + "', '" + discordUsername.replace("'", "~") + "', 'false', 'true')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'false', 'true')");
         } else {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `discordUserName`, `isAdmin`, `botPermission`)", "('" + userID + "', '" + discordUsername.replace("'", "~") + "', 'false', 'false')");
+            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'false', 'false')");
         }
 
         int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_User", "userID", String.valueOf(userID));
-        DBServer.getServer(ServerID).getUsers().setData(DB_ID, userID, discordUsername, isAdmin, botPermission);
+        DBServer.getServer(ServerID).getUsers().setData(DB_ID, userID, isAdmin, botPermission);
     }
 }

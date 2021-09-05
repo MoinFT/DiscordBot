@@ -4,7 +4,6 @@ public class DBChannelArray {
     private int ID;
     private int DB_ID;
     private long ChannelID;
-    private String DiscordChannelName;
     private String ChannelType;
     private String ChannelName;
 
@@ -15,7 +14,6 @@ public class DBChannelArray {
         this.ID = 0;
         this.DB_ID = 0;
         this.ChannelID = 0;
-        this.DiscordChannelName = "";
         this.ChannelType = "";
         this.ChannelName = "";
 
@@ -23,11 +21,10 @@ public class DBChannelArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long ChannelID, String DiscordChannelName, String ChannelType, String ChannelName) {
+    public void setData(int DB_ID, long ChannelID, String ChannelType, String ChannelName) {
         if (this.free) {
             this.DB_ID = DB_ID;
             this.ChannelID = ChannelID;
-            this.DiscordChannelName = DiscordChannelName;
             this.ChannelType = ChannelType;
             this.ChannelName = ChannelName;
 
@@ -38,7 +35,7 @@ public class DBChannelArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, ChannelID, DiscordChannelName, ChannelType, ChannelName);
+            this.follower.setData(DB_ID, ChannelID, ChannelType, ChannelName);
         }
     }
 
@@ -47,13 +44,11 @@ public class DBChannelArray {
             if (this.follower != null) {
                 this.DB_ID = this.follower.DB_ID;
                 this.ChannelID = this.follower.ChannelID;
-                this.DiscordChannelName = this.follower.DiscordChannelName;
                 this.ChannelType = this.follower.ChannelType;
                 this.ChannelName = this.follower.ChannelName;
             } else {
                 this.DB_ID = 0;
                 this.ChannelID = 0;
-                this.DiscordChannelName = "";
                 this.ChannelType = "";
                 this.ChannelName = "";
                 this.free = true;
@@ -111,10 +106,6 @@ public class DBChannelArray {
 
     public long getChannelID() {
         return this.ChannelID;
-    }
-
-    public String getDiscordChannelName() {
-        return this.DiscordChannelName;
     }
 
     public String getChannelType() {
