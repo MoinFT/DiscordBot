@@ -1,6 +1,8 @@
 package de.moinFT.main;
 
 import de.moinFT.utils.Privates;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.message.Message;
 import org.javacord.api.entity.permission.Role;
@@ -15,6 +17,8 @@ import static de.moinFT.main.Main.DBServer;
 import static de.moinFT.main.Main.client;
 
 public class Functions {
+    private static final Logger log = LogManager.getLogger(Functions.class.getName());
+
     public static Message replyMessage(Message message, String messageContent) {
         try {
             return message.getChannel().sendMessage(message.getUserAuthor().get().getMentionTag() + messageContent).get();
@@ -97,11 +101,11 @@ public class Functions {
             try {
                 client.getServerById(DBServer.getServer(i_Server).getServerID()).get();
             } catch (Exception e) {
-                System.out.println("Remove Server from DB: " + DBServer.getServer(i_Server).getServerID());
-                DatabaseConnection.DBDeleteItem("server", DBServer.getServer(i_Server).getDB_ID());
-                DatabaseConnection.DB_SQL_Execute("DROP TABLE " + DBServer.getServer(i_Server).getServerID() + "_Channel");
-                DatabaseConnection.DB_SQL_Execute("DROP TABLE " + DBServer.getServer(i_Server).getServerID() + "_Role");
-                DatabaseConnection.DB_SQL_Execute("DROP TABLE " + DBServer.getServer(i_Server).getServerID() + "_User");
+                log.info("Remove Server from DB: " + DBServer.getServer(i_Server).getServerID());
+                DatabaseConnection.SQL_Execute("DELETE FROM server WHERE serverID = " + DBServer.getServer(i_Server).getServerID());
+                DatabaseConnection.SQL_Execute("DELETE FROM channel WHERE serverID = " + DBServer.getServer(i_Server).getServerID());
+                DatabaseConnection.SQL_Execute("DELETE FROM role WHERE serverID = " + DBServer.getServer(i_Server).getServerID());
+                DatabaseConnection.SQL_Execute("DELETE FROM user WHERE serverID = " + DBServer.getServer(i_Server).getServerID());
                 DBServer.delete(i_Server);
             }
         }
@@ -133,8 +137,8 @@ public class Functions {
             try {
                 client.getServerById(serverID).get().getChannelById(DBServer.getServer(i).getChannels().getChannel(i_Channel).getChannelID()).get();
             } catch (Exception e) {
-                System.out.println("Remove Channel from DB: " + DBServer.getServer(i).getChannels().getChannel(i_Channel).getDB_ID());
-                DatabaseConnection.DBDeleteItem(serverID + "_Channel", DBServer.getServer(i).getChannels().getChannel(i_Channel).getDB_ID());
+                log.info("Remove Channel from DB: " + DBServer.getServer(i).getChannels().getChannel(i_Channel).getChannelID());
+                DatabaseConnection.SQL_Execute("DELETE FROM channel WHERE serverID = " + DBServer.getServer(i).getServerID() + " AND channelID = " + DBServer.getServer(i).getChannels().getChannel(i_Channel).getChannelID());
                 DBServer.getServer(serverID).getChannels().delete(i_Channel);
             }
         }
@@ -166,8 +170,8 @@ public class Functions {
             try {
                 client.getServerById(serverID).get().getRoleById(DBServer.getServer(i).getRoles().getRole(i_Role).getRoleID()).get();
             } catch (Exception e) {
-                System.out.println("Remove Role from DB: " + DBServer.getServer(i).getRoles().getRole(i_Role).getDB_ID());
-                DatabaseConnection.DBDeleteItem(serverID + "_Role", DBServer.getServer(i).getRoles().getRole(i_Role).getDB_ID());
+                log.info("Remove Role from DB: " + DBServer.getServer(i).getRoles().getRole(i_Role).getRoleID());
+                DatabaseConnection.SQL_Execute("DELETE FROM role WHERE serverID = " + DBServer.getServer(i).getServerID() + " AND roleID = " + DBServer.getServer(i).getRoles().getRole(i_Role).getRoleID());
                 DBServer.getServer(serverID).getRoles().delete(i_Role);
             }
         }
@@ -199,8 +203,8 @@ public class Functions {
             try {
                 client.getServerById(serverID).get().getMemberById(DBServer.getServer(i).getUsers().getUser(i_User).getUserID()).get();
             } catch (Exception e) {
-                System.out.println("Remove User from DB: " + DBServer.getServer(i).getUsers().getUser(i_User).getDB_ID());
-                DatabaseConnection.DBDeleteItem(serverID + "_User", DBServer.getServer(i).getUsers().getUser(i_User).getDB_ID());
+                log.info("Remove User from DB: " + DBServer.getServer(i).getUsers().getUser(i_User).getUserID());
+                DatabaseConnection.SQL_Execute("DELETE FROM user WHERE serverID = " + DBServer.getServer(i).getServerID() + " AND userID = " + DBServer.getServer(i).getUsers().getUser(i_User).getUserID());
                 DBServer.getServer(serverID).getUsers().delete(i_User);
             }
         }
@@ -227,36 +231,9 @@ public class Functions {
     public static void addServerToDB(Server Server) {
         long serverID = Server.getId();
 
-        System.out.println("Add Server to DB: " + serverID);
-        DatabaseConnection.DBAddItem("server", "(`serverID`, `commandTimeoutTimestamp`, `commandTimeout`, `prefix`, `musicBotPrefix`)", "('" + serverID + "', '0', '5000', '!', '-')");
-
-        DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_Channel` (" +
-                " `id` int(11) NOT NULL AUTO_INCREMENT," +
-                " `channelID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `channelType` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `channelName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " PRIMARY KEY (`id`)," +
-                " UNIQUE `channelID` (`channelID`)" +
-                ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-        DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_Role` (" +
-                " `id` int(11) NOT NULL AUTO_INCREMENT," +
-                " `roleID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `roleType` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `roleName` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " PRIMARY KEY (`id`)," +
-                " UNIQUE KEY `roleID` (`roleID`)" +
-                ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-        DatabaseConnection.DB_SQL_Execute("CREATE TABLE `discordBot`.`" + serverID + "_User` (" +
-                " `id` int(11) NOT NULL AUTO_INCREMENT," +
-                " `userID` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `isAdmin` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " `botPermission` varchar(255) COLLATE utf8_unicode_ci NOT NULL," +
-                " PRIMARY KEY (`id`)," +
-                " UNIQUE KEY `userID` (`userID`)" +
-                ") ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci");
-
-        int DB_ID = DatabaseConnection.DBGetDB_ID("server", "serverID", String.valueOf(serverID));
-        DBServer.setData(DB_ID, serverID, 0, 0, "!", "-");
+        log.info("Add Server to DB: " + serverID);
+        DatabaseConnection.SQL_Execute("INSERT INTO server (serverID, commandTimeoutTimestamp, commandTimeout, prefix, musicBotPrefix) VALUES ('" + serverID + "', '0', '5000', '!', '-')");
+        DBServer.setData(serverID, 0, 0, "!", "-");
     }
 
     public static void addChannelToDB(long ServerID, ServerChannel Channel) {
@@ -264,6 +241,7 @@ public class Functions {
 
         String channelType;
         String channelName = "";
+
         if (Channel.getType().isTextChannelType()) {
             channelType = "textChannel";
         } else if (Channel.getType().isVoiceChannelType()) {
@@ -277,43 +255,35 @@ public class Functions {
             channelType = "categorieChannel";
         }
 
-        System.out.println("Add Channel to DB: " + channelID);
-        DatabaseConnection.DBAddItem(ServerID + "_Channel", "(`channelID`, `channelType`, `channelName`)", "('" + channelID + "', '" + channelType + "', '" + channelName + "')");
-
-        int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_Channel", "channelID", String.valueOf(channelID));
-        DBServer.getServer(ServerID).getChannels().setData(DB_ID, channelID, channelType, channelName);
+        log.info("Add Channel to DB: " + channelID);
+        DatabaseConnection.SQL_Execute("INSERT INTO channel (serverID, channelID, channelType, channelName) VALUES ('" + ServerID + "', '" + channelID + "', '" + channelType + "', '" + channelName + "')");
+        DBServer.getServer(ServerID).getChannels().setData(ServerID, channelID, channelType, channelName);
     }
 
     public static void addRoleToDB(long ServerID, Role Role) {
         long roleID = Role.getId();
 
-        System.out.println("Add Role to DB: " + roleID);
+        String roleName = "";
+        String roleType = "";
+
         if (Role.isEveryoneRole()) {
-            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `roleName`, `roleType`)", "('" + roleID + "', 'everyone', 'everyone')");
-        } else {
-            DatabaseConnection.DBAddItem(ServerID + "_Role", "(`roleID`, `roleName`, `roleType`)", "('" + roleID + "', '', '')");
+            roleName = "everyone";
+            roleType = "everyone";
         }
 
-        int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_Role", "roleID", String.valueOf(roleID));
-        DBServer.getServer(ServerID).getRoles().setData(DB_ID, roleID, "", "");
+        log.info("Add Role to DB: " + roleID);
+        DatabaseConnection.SQL_Execute("INSERT INTO role (serverID, roleID, roleName, roleType) VALUES ('" + ServerID + "', '" + roleID + "', '" + roleName + "', '" + roleType + "')");
+        DBServer.getServer(ServerID).getRoles().setData(ServerID, roleID, roleType, roleName);
     }
 
     public static void addUserToDB(long ServerID, User User) {
         long userID = User.getId();
 
-        System.out.println("Add User to DB: " + userID);
         boolean isAdmin = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User);
         boolean botPermission = client.getServerById(ServerID).get().isAdmin(User) || client.getServerById(ServerID).get().isOwner(User) || userID == Privates.MyUserID;
 
-        if (isAdmin) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'true', 'true')");
-        } else if (userID == Privates.MyUserID) {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'false', 'true')");
-        } else {
-            DatabaseConnection.DBAddItem(ServerID + "_User", "(`userID`, `isAdmin`, `botPermission`)", "('" + userID + "', 'false', 'false')");
-        }
-
-        int DB_ID = DatabaseConnection.DBGetDB_ID(ServerID + "_User", "userID", String.valueOf(userID));
-        DBServer.getServer(ServerID).getUsers().setData(DB_ID, userID, isAdmin, botPermission);
+        log.info("Add User to DB: " + userID);
+        DatabaseConnection.SQL_Execute("INSERT INTO user (serverID, userID, isAdmin, botPermission) VALUES ('" + ServerID + "', '" + userID + "', '" + isAdmin + "', '" + botPermission + "')");
+        DBServer.getServer(ServerID).getUsers().setData(ServerID, userID, isAdmin, botPermission);
     }
 }

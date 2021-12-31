@@ -1,4 +1,4 @@
-package de.moinFT.main.listener;
+package de.moinFT.main.listener.member;
 
 import de.moinFT.main.DatabaseConnection;
 import org.javacord.api.entity.channel.ServerChannel;
@@ -12,25 +12,19 @@ import org.javacord.api.listener.server.role.UserRoleAddListener;
 
 import static de.moinFT.main.Main.DBServer;
 
-public class URoleAddListener implements UserRoleAddListener {
-
-    private Server Server = null;
-    private long ServerID = 0;
-    private User User = null;
-    private long UserID = 0;
+public class RoleAddListener implements UserRoleAddListener {
 
     @Override
     public void onUserRoleAdd(UserRoleAddEvent event) {
-        Server = event.getServer();
-        ServerID = Server.getId();
-        User = event.getUser();
-        UserID = User.getId();
+        Server Server = event.getServer();
+        long ServerID = Server.getId();
+        User User = event.getUser();
+        long UserID = User.getId();
 
         if (Server.isAdmin(User)) {
             DBServer.getServer(ServerID).getUsers().getUser(UserID).updateBotPermission(true);
             DBServer.getServer(ServerID).getUsers().getUser(UserID).updateIsAdmin(true);
-            DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(UserID).getDB_ID(), "`botPermission` = '" + true + "'");
-            DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(UserID).getDB_ID(), "`isAdmin` = '" + true + "'");
+            DatabaseConnection.SQL_Execute("UPDATE user SET botPermission = 'true', isAdmin = 'true' WHERE serverID = '" + ServerID + "' AND userID = '" + UserID + "'");
 
             int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
 

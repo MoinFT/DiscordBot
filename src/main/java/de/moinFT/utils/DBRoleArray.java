@@ -2,7 +2,7 @@ package de.moinFT.utils;
 
 public class DBRoleArray {
     private int ID;
-    private int DB_ID;
+    private long ServerID;
     private long RoleID;
     private String RoleName;
     private String RoleType;
@@ -12,7 +12,7 @@ public class DBRoleArray {
 
     public DBRoleArray() {
         this.ID = 0;
-        this.DB_ID = 0;
+        this.ServerID = 0;
         this.RoleID = 0;
         this.RoleName = "";
         this.RoleType = "";
@@ -21,9 +21,9 @@ public class DBRoleArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long RoleID, String roleType, String roleName) {
+    public void setData(long ServerID, long RoleID, String roleType, String roleName) {
         if (this.free) {
-            this.DB_ID = DB_ID;
+            this.ServerID = ServerID;
             this.RoleID = RoleID;
             this.RoleName = roleName;
             this.RoleType = roleType;
@@ -35,19 +35,19 @@ public class DBRoleArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, RoleID, roleType, roleName);
+            this.follower.setData(ServerID, RoleID, roleType, roleName);
         }
     }
 
     public void delete(long RoleID) {
         if (this.RoleID == RoleID) {
             if (this.follower != null) {
-                this.DB_ID = this.follower.DB_ID;
+                this.ServerID = this.follower.ServerID;
                 this.RoleID = this.follower.RoleID;
                 this.RoleType = this.follower.RoleType;
                 this.RoleName = this.follower.RoleName;
             } else {
-                this.DB_ID = 0;
+                this.ServerID = 0;
                 this.RoleID = 0;
                 this.RoleType = "";
                 this.RoleName = "";
@@ -83,10 +83,6 @@ public class DBRoleArray {
                 return null;
             }
         }
-    }
-
-    public int getDB_ID() {
-        return this.DB_ID;
     }
 
     public long getRoleID() {

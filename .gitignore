@@ -2,8 +2,11 @@
 /.gradle/
 /.idea/
 /gradle/
+/gradlew
+/gradlew.bat
 /out/
 /src/main/resources/META-INF
+/output.log
 
 !/src/main/java/de/moinFT/utils/*
 /src/main/java/de/moinFT/utils/Privates.java

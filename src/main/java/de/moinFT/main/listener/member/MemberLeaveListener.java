@@ -1,4 +1,4 @@
-package de.moinFT.main.listener;
+package de.moinFT.main.listener.member;
 
 import de.moinFT.main.DatabaseConnection;
 import org.javacord.api.entity.server.Server;
@@ -10,19 +10,14 @@ import static de.moinFT.main.Main.DBServer;
 
 public class MemberLeaveListener implements ServerMemberLeaveListener {
 
-    private Server Server = null;
-    private long ServerID = 0;
-    private User User = null;
-    private long UserID = 0;
-
     @Override
     public void onServerMemberLeave(ServerMemberLeaveEvent event) {
-        Server = event.getServer();
-        ServerID = Server.getId();
-        User = event.getUser();
-        UserID = User.getId();
+        Server Server = event.getServer();
+        long ServerID = Server.getId();
+        User User = event.getUser();
+        long UserID = User.getId();
 
-        DatabaseConnection.DBDeleteItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(UserID).getDB_ID());
+        DatabaseConnection.SQL_Execute("DELETE FROM user WHERE serverID = " + ServerID + " AND userID = " + UserID);
         DBServer.getServer(ServerID).getUsers().delete(UserID);
     }
 }

@@ -1,4 +1,4 @@
-package de.moinFT.main.listener;
+package de.moinFT.main.listener.member;
 
 import de.moinFT.main.Functions;
 import org.javacord.api.entity.permission.Role;
@@ -11,15 +11,11 @@ import static de.moinFT.main.Main.DBServer;
 
 public class MemberJoinListener implements ServerMemberJoinListener {
 
-    private Server Server = null;
-    private long ServerID = 0;
-    private User User = null;
-
     @Override
     public void onServerMemberJoin(ServerMemberJoinEvent event) {
-        Server = event.getServer();
-        ServerID = Server.getId();
-        User = event.getUser();
+        Server Server = event.getServer();
+        long ServerID = Server.getId();
+        User User = event.getUser();
 
         if (!User.isBot()) {
             int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();

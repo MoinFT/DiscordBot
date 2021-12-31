@@ -1,4 +1,4 @@
-package de.moinFT.main.listener;
+package de.moinFT.main.listener.channel;
 
 import de.moinFT.main.DatabaseConnection;
 import org.javacord.api.entity.channel.Channel;
@@ -10,19 +10,14 @@ import static de.moinFT.main.Main.DBServer;
 
 public class ChannelDeleteListener implements ServerChannelDeleteListener {
 
-    private Server Server = null;
-    private long ServerID = 0;
-    private Channel Channel = null;
-    private long ChannelID = 0;
-
     @Override
     public void onServerChannelDelete(ServerChannelDeleteEvent event) {
-        Server = event.getServer();
-        ServerID = Server.getId();
-        Channel = event.getChannel();
-        ChannelID = Channel.getId();
+        Server Server = event.getServer();
+        long ServerID = Server.getId();
+        Channel Channel = event.getChannel();
+        long ChannelID = Channel.getId();
 
-        DatabaseConnection.DBDeleteItem(ServerID + "_Channel", DBServer.getServer(ServerID).getChannels().getChannel(ChannelID).getDB_ID());
+        DatabaseConnection.SQL_Execute("DELETE FROM channel WHERE serverID = '" + ServerID + "' AND channelID = '" + ChannelID + "'");
         DBServer.getServer(ServerID).getChannels().delete(ChannelID);
     }
 }

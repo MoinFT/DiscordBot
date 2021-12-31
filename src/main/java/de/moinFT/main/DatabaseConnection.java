@@ -24,33 +24,39 @@ public class DatabaseConnection {
             Statement statement = con.createStatement();
             statement.execute("USE " + database);
 
-            res = statement.executeQuery("SELECT * FROM `server`");
+            res = statement.executeQuery("SELECT * FROM server");
 
             while (res.next()) {
-                DBServer.setData(res.getInt("id"), res.getLong("serverID"), res.getLong("commandTimeoutTimestamp"), res.getInt("commandTimeout"), res.getString("prefix"), res.getString("musicBotPrefix"));
+                DBServer.setData(res.getLong("serverID"), res.getLong("commandTimeoutTimestamp"), res.getInt("commandTimeout"), res.getString("prefix"), res.getString("musicBotPrefix"));
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_User`");
+                long serverID = DBServer.getServer(i).getServerID();
+
+                res = statement.executeQuery("SELECT * FROM user WHERE serverID = " + serverID);
 
                 while (res.next()) {
-                    DBServer.getServer(i).getUsers().setData(res.getInt("id"), res.getLong("userID"), res.getBoolean("isAdmin"), res.getBoolean("botPermission"));
+                    DBServer.getServer(i).getUsers().setData(res.getLong("serverID"), res.getLong("userID"), res.getBoolean("isAdmin"), res.getBoolean("botPermission"));
                 }
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Role`");
+                long serverID = DBServer.getServer(i).getServerID();
+
+                res = statement.executeQuery("SELECT * FROM role WHERE serverID = " + serverID);
 
                 while (res.next()) {
-                    DBServer.getServer(i).getRoles().setData(res.getInt("id"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
+                    DBServer.getServer(i).getRoles().setData(res.getLong("serverID"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
                 }
             }
 
             for (int i = 0; i < DBServer.count(); i++) {
-                res = statement.executeQuery("SELECT * FROM `" + DBServer.getServer(i).getServerID() + "_Channel`");
+                long serverID = DBServer.getServer(i).getServerID();
+
+                res = statement.executeQuery("SELECT * FROM channel WHERE serverID = " + serverID);
 
                 while (res.next()) {
-                    DBServer.getServer(i).getChannels().setData(res.getInt("id"), res.getLong("channelID"), res.getString("channelType"), res.getString("channelName"));
+                    DBServer.getServer(i).getChannels().setData(res.getLong("serverID"), res.getLong("channelID"), res.getString("channelType"), res.getString("channelName"));
                 }
             }
 
@@ -64,92 +70,7 @@ public class DatabaseConnection {
         }
     }
 
-    public static int DBGetDB_ID(String table, String compareColumn, String compareValue) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            Connection con = DriverManager.getConnection(Privates.DBConnectionURL, Privates.DBUser, Privates.DBPassword);
-
-            Statement statement = con.createStatement();
-            statement.execute("USE " + database);
-
-            ResultSet res = statement.executeQuery("SELECT * FROM `" + table + "` WHERE `" + compareColumn + "` = '" + compareValue + "'");
-
-            res.next();
-            int result = res.getInt("id");
-
-            res.close();
-            statement.close();
-            con.close();
-
-            return result;
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
-            return 0;
-        }
-    }
-
-    public static void DBAddItem(String table, String columns, String values) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            Connection con = DriverManager.getConnection(Privates.DBConnectionURL, Privates.DBUser, Privates.DBPassword);
-
-            Statement statement = con.createStatement();
-            statement.execute("USE " + database);
-
-            statement.execute("INSERT `" + table + "` " + columns + " VALUES " + values);
-
-            statement.close();
-            con.close();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
-        }
-    }
-
-    public static void DBUpdateItem(String table, int DB_ID, String columnsAndValues) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            Connection con = DriverManager.getConnection(Privates.DBConnectionURL, Privates.DBUser, Privates.DBPassword);
-
-            Statement statement = con.createStatement();
-            statement.execute("USE " + database);
-
-            statement.execute("UPDATE `" + table + "` SET " + columnsAndValues + " WHERE `id`= " + DB_ID);
-            statement.close();
-            con.close();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
-        }
-    }
-
-    public static void DBDeleteItem(String table, int DB_ID) {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-
-            Connection con = DriverManager.getConnection(Privates.DBConnectionURL, Privates.DBUser, Privates.DBPassword);
-
-            Statement statement = con.createStatement();
-            statement.execute("USE " + database);
-
-            statement.execute("DELETE FROM `" + table + "` WHERE `id`= " + DB_ID);
-            statement.close();
-            con.close();
-
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
-        }
-    }
-
-    public static void DB_SQL_Execute(String sqlString) {
+    public static void SQL_Execute(String sqlString) {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
 

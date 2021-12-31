@@ -1,4 +1,4 @@
-package de.moinFT.main.listener;
+package de.moinFT.main.listener.message;
 
 import com.vdurmont.emoji.EmojiParser;
 import de.moinFT.main.DatabaseConnection;
@@ -62,10 +62,10 @@ public class MessageListener implements MessageCreateListener {
                 textChannel = channelMessage;
             }
 
-            if (!UserMessage.getAuthor().isYourself() && !UserMessage.getUserAuthor().get().isBot()) {
+            if (!UserMessage.getAuthor().isWebhook() && !UserMessage.getAuthor().isBotUser()) {
                 if (UserMessageContent.startsWith(Prefix)) {
                     //ServerAdmin
-                    if (UserMessage.getAuthor().isServerAdmin()) {
+                    if (UserMessage.getAuthor().isServerAdmin() || UserMessage.getAuthor().isBotOwner()) {
                         if (UserMessageContent.startsWith(Prefix + "toggle-bot-permission")) {
                             User user = getFirstUser_FromMessage(1, UserMessage);
 
@@ -89,7 +89,7 @@ public class MessageListener implements MessageCreateListener {
                                     }
 
                                     DBServer.getServer(ServerID).getUsers().getUser(userID).updateBotPermission(!botPermission);
-                                    DatabaseConnection.DBUpdateItem(ServerID + "_User", DBServer.getServer(ServerID).getUsers().getUser(userID).getDB_ID(), "`botPermission` = '" + !botPermission + "'");
+                                    DatabaseConnection.SQL_Execute("UPDATE user SET botPermission = '" + !botPermission + "' WHERE serverID = '" + ServerID + "' AND userID = '" + userID + "'");
                                 } else {
                                     errorMessageWithReaction(", du kannst dir nicht selbst die Rechte entziehen!");
                                 }
@@ -366,7 +366,7 @@ public class MessageListener implements MessageCreateListener {
                             User addUser = getFirstUser_FromMessage(2, UserMessage);
 
                             if (addRole != null && addUser != null) {
-                                if (highestRole.getPosition() >= addRole.getPosition()) {
+                                if (highestRole.getPosition() >= addRole.getPosition() || UserMessage.getUserAuthor().get().isBotOwner()) {
                                     UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
                                     Server.addRoleToUser(addUser, addRole);
                                 } else {
@@ -412,7 +412,7 @@ public class MessageListener implements MessageCreateListener {
                             if (!error) {
                                 UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
                                 DBServer.getServer(ServerID).updateMusicBotPrefix(prefix);
-                                DatabaseConnection.DBUpdateItem("server", DBServer.getServer(ServerID).getDB_ID(), "`musicBotPrefix` = '" + prefix + "'");
+                                DatabaseConnection.SQL_Execute("UPDATE server SET musicBotPrefix = '" + prefix + "' WHERE serverID = '" + ServerID + "'");
                             }
 
                             Functions.messageDelete(UserMessage, 2500);
@@ -457,7 +457,7 @@ public class MessageListener implements MessageCreateListener {
                             if (!error) {
                                 UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
                                 DBServer.getServer(ServerID).getChannels().getChannel(channelID).updateChannelName(channelName);
-                                DatabaseConnection.DBUpdateItem(ServerID + "_Channel", DBServer.getServer(ServerID).getChannels().getChannel(channelID).getDB_ID(), "`channelName` = '" + channelName + "'");
+                                DatabaseConnection.SQL_Execute("UPDATE channel SET channelName = '" + channelName + "' WHERE serverID = '" + ServerID + "' AND channelID = '" + channelID + "'");
                             }
 
                             Functions.messageDelete(UserMessage, 2500);
@@ -518,8 +518,7 @@ public class MessageListener implements MessageCreateListener {
                                 UserMessage.addReaction(EmojiParser.parseToUnicode(":ok_hand:"));
                                 DBServer.getServer(ServerID).getRoles().getRole(roleID).updateRoleType(roleType);
                                 DBServer.getServer(ServerID).getRoles().getRole(roleID).updateRoleName(roleName);
-                                DatabaseConnection.DBUpdateItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleType` = '" + roleType + "'");
-                                DatabaseConnection.DBUpdateItem(ServerID + "_Role", DBServer.getServer(ServerID).getRoles().getRole(roleID).getDB_ID(), "`roleName` = '" + roleName + "'");
+                                DatabaseConnection.SQL_Execute("UPDATE role SET roleType = '" + roleType + "', roleName = '" + roleName + "' WHERE serverID = '" + ServerID + "' AND roleID = '" + roleID + "'");
                             }
 
                             Functions.messageDelete(UserMessage, 2500);
@@ -534,7 +533,7 @@ public class MessageListener implements MessageCreateListener {
                         }
                     }
                 }
-            } else if (!UserMessage.getUserAuthor().get().isYourself() && UserMessage.getUserAuthor().get().isBot()) {
+            } else if (!UserMessage.getAuthor().isYourself() && UserMessage.getAuthor().isBotUser()) {
                 if (DBServer.getServer(ServerID).getChannels().getChannel("musicbot") != null) {
                     long musicbotChannelID = DBServer.getServer(ServerID).getChannels().getChannel("musicbot").getChannelID();
                     if (UserMessage.getChannel().getId() == musicbotChannelID) {
@@ -661,7 +660,7 @@ public class MessageListener implements MessageCreateListener {
                 }
 
                 DBServer.getServer(ServerID).updateCommandTimeoutTimestamp(timestamp);
-                DatabaseConnection.DBUpdateItem("server", DBServer.getServer(ServerID).getDB_ID(), "`commandTimeout` = '" + timestamp + "'");
+                DatabaseConnection.SQL_Execute("UPDATE server SET commandTimeout = '" + timestamp + "' WHERE serverID = '" + ServerID + "'");
             } else {
                 UserMessage.addReaction(EmojiParser.parseToUnicode(":no_entry:"));
             }

@@ -7,7 +7,7 @@
       },
       {
         "command": "corona",
-        "message": "Gibt den aktuellen Inzidenzwert von Nienburg (Weser) aus."
+        "message": "Gibt den derzeitigen Inzidenzwert von Nienburg (Weser) aus."
       },
       {
         "command": "info-user [UserMention]",
@@ -33,7 +33,7 @@
       },
       {
         "command": "clear [Wert]",
-        "message": "Loescht [Wert] Nachrichten aus einem TextChannel"
+        "message": "Löscht [Wert] Nachrichten aus einem TextChannel"
       },
       {
         "command": "add-role [UserMention] [RoleMention]",
@@ -45,19 +45,19 @@
       },
       {
         "command": "info-role-set",
-        "message": "Gibt Auskunft ueber dem Bot zugewiesene Rollen"
+        "message": "Gibt Auskunft über dem Bot zugewiesene Rollen"
       },
       {
         "command": "info-channel-set",
-        "message": "Gibt Auskunft ueber dem Bot zugewiesene Kanaele"
+        "message": "Gibt Auskunft über dem Bot zugewiesene Kanäle"
       },
       {
         "command": "info-user-set (-page [page])",
-        "message": "Gibt Auskunft ueber Nutzer"
+        "message": "Gibt Auskunft über Nutzer"
       },
       {
         "command": "info-bot-permission",
-        "message": "Gibt Auskunft ueber Nutzer mit Bot Berechtigung"
+        "message": "Gibt Auskunft über Nutzer mit Bot Berechtigung"
       }
     ],
     "botPermAdmin": [
@@ -73,11 +73,11 @@
       },
       {
         "command": "channel-set [channelMention] [channelName]",
-        "message": "Fuegt einem Channel [channelMention] einen Namen [channelName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFuer Admin (Beispiel): !channel-set #admin admin"
+        "message": "Fügt einem Channel [channelMention] einen Namen [channelName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFür Admin (Beispiel): !channel-set #admin admin"
       },
       {
         "command": "role-set [roleMention] [roleType] [roleName]",
-        "message": "Fuegt einer Rolle [roleMention] einen Typ [roleType] und einen Namen [roleName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFuer eine Farbe (Beispiel): !role-set @yellow color yellow"
+        "message": "Fügt einer Rolle [roleMention] einen Typ [roleType] und einen Namen [roleName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFür eine Farbe (Beispiel): !role-set @yellow color yellow"
       }
     ]
   }

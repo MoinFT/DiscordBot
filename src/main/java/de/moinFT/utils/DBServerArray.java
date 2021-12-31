@@ -2,7 +2,6 @@ package de.moinFT.utils;
 
 public class DBServerArray {
     private int ID;
-    private int DB_ID;
     private long ServerID;
     private long CommandTimeoutTimestamp;
     private int CommandTimeout;
@@ -17,7 +16,6 @@ public class DBServerArray {
 
     public DBServerArray() {
         this.ID = 0;
-        this.DB_ID = 0;
         this.ServerID = 0;
         this.CommandTimeoutTimestamp = 0;
         this.CommandTimeout = 0;
@@ -31,9 +29,8 @@ public class DBServerArray {
         this.follower = null;
     }
 
-    public void setData(int DB_ID, long ServerID, long CommandTimeoutTimestamp, int CommandTimeout, String Prefix, String MusicBotPrefix) {
+    public void setData(long ServerID, long CommandTimeoutTimestamp, int CommandTimeout, String Prefix, String MusicBotPrefix) {
         if (this.free) {
-            this.DB_ID = DB_ID;
             this.ServerID = ServerID;
             this.CommandTimeoutTimestamp = CommandTimeoutTimestamp;
             this.CommandTimeout = CommandTimeout;
@@ -47,14 +44,13 @@ public class DBServerArray {
                 this.follower.ID = this.ID + 1;
             }
 
-            this.follower.setData(DB_ID, ServerID, CommandTimeoutTimestamp, CommandTimeout, Prefix, MusicBotPrefix);
+            this.follower.setData(ServerID, CommandTimeoutTimestamp, CommandTimeout, Prefix, MusicBotPrefix);
         }
     }
 
     public void delete(int ID) {
         if (this.ID == ID) {
             if (this.follower != null) {
-                this.DB_ID = this.follower.DB_ID;
                 this.ServerID = this.follower.ServerID;
                 this.CommandTimeoutTimestamp = this.follower.CommandTimeoutTimestamp;
                 this.CommandTimeout = this.follower.CommandTimeout;
@@ -64,7 +60,6 @@ public class DBServerArray {
                 this.Roles = this.follower.Roles;
                 this.Channels = this.follower.Channels;
             } else {
-                this.DB_ID = 0;
                 this.ServerID = 0;
                 this.CommandTimeoutTimestamp = 0;
                 this.CommandTimeout = 0;
@@ -107,10 +102,6 @@ public class DBServerArray {
 
     public int getID() {
         return this.ID;
-    }
-
-    public int getDB_ID() {
-        return this.DB_ID;
     }
 
     public long getServerID() {
