@@ -2,82 +2,90 @@
   "attributes": {
     "normalHelp": [
       {
-        "command": "help",
+        "command": "/help",
         "message": "Diese Liste"
       },
       {
-        "command": "corona",
+        "command": "/corona",
         "message": "Gibt den derzeitigen Inzidenzwert von Nienburg (Weser) aus."
       },
       {
-        "command": "info-user [UserMention]",
-        "message": "Zeigt Informationen über den User [UserMention] an."
+        "command": "/show user",
+        "message": "Zeigt Informationen über den User an."
       },
       {
-        "command": "info-server",
+        "command": "/show server",
         "message": "Zeigt Informationen über den Server an."
       },
       {
-        "command": "m-a",
+        "command": "/show bot-permission",
+        "message": "Gibt Auskunft über Nutzer mit Bot Berechtigung"
+      },
+      {
+        "command": "/m-a",
         "message": "Alle Personnen in seinem VoiceChannel stummschalten (Cooldown: 5 Sekunden)"
       }
     ],
     "botPerm": [
       {
-        "command": "help-all",
+        "command": "!help-all",
         "message": "Diese Liste"
       },
       {
-        "command": "help-set",
+        "command": "!help-set",
         "message": "Bot-Befehle (Bot Variablen setzen)"
       },
       {
-        "command": "clear [Wert]",
-        "message": "Löscht [Wert] Nachrichten aus einem TextChannel"
+        "command": "/clear",
+        "message": "Löscht eine bestimmte Anzahl Nachrichten aus einem TextChannel (Maximal 10)"
       },
       {
-        "command": "add-role [UserMention] [RoleMention]",
-        "message": "Gibt dem Nutzer [UserMention] die Rolle [RoleMention]"
+        "command": "/role add",
+        "message": "Gibt dem Nutzer die Rolle"
       },
       {
-        "command": "remove-role [UserMention] [RoleMention]",
-        "message": "Nimmt dem Nutzer [UserMention] die Rolle [RoleMention]"
+        "command": "/role remove",
+        "message": "Nimmt dem Nutzer die Rolle"
       },
       {
-        "command": "info-role-set",
-        "message": "Gibt Auskunft über dem Bot zugewiesene Rollen"
-      },
-      {
-        "command": "info-channel-set",
-        "message": "Gibt Auskunft über dem Bot zugewiesene Kanäle"
-      },
-      {
-        "command": "info-user-set (-page [page])",
+        "command": "/show users",
         "message": "Gibt Auskunft über Nutzer"
       },
       {
-        "command": "info-bot-permission",
-        "message": "Gibt Auskunft über Nutzer mit Bot Berechtigung"
+        "command": "/show roles",
+        "message": "Gibt Auskunft über dem Bot zugewiesene Rollen"
+      },
+      {
+        "command": "/show channels",
+        "message": "Gibt Auskunft über dem Bot zugewiesene Kanäle"
       }
     ],
     "botPermAdmin": [
       {
-        "command": "toggle-permission-bot [UserMention]",
-        "message": "Gibt/Nimmt dem Nutzer (UserID) die  Bot Berechtigungen"
+        "command": "/bot-permission set",
+        "message": "Gibt/Nimmt dem Nutzer die Bot Berechtigungen"
       }
     ],
     "botVarSet": [
       {
-        "command": "help-set",
+        "command": "!help-set",
         "message": "Diese Liste"
       },
       {
-        "command": "channel-set [channelMention] [channelName]",
-        "message": "Fügt einem Channel [channelMention] einen Namen [channelName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFür Admin (Beispiel): !channel-set #admin admin"
+        "command": "/set channel",
+        "message": "Fügt einem Channel einen Namen hinzu"
       },
       {
-        "command": "role-set [roleMention] [roleType] [roleName]",
-        "message": "Fügt einer Rolle [roleMention] einen Typ [roleType] und einen Namen [roleName] hinzu.\n\t\t\t\t\t\t\t\t\t\t\t\t\t\tFür eine Farbe (Beispiel): !role-set @yellow color yellow"
+        "command": "/set role",
+        "message": "Fügt einer Rolle einen Typ und einen Namen hinzu"
+      },
+      {
+        "command": "/set command-timeout",
+        "message": "Setzt die Timeout Zeit, welche für einige Befehle genutzt wird. (Anti Command Spam)"
+      },
+      {
+        "command": "/set musicbot-prefix",
+        "message": "Setzt den Prefix für Musikbot Commands. (Um diese aus dem Musikbot Channel zu löschen)"
       }
     ]
   }

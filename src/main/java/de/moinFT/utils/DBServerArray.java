@@ -108,7 +108,7 @@ public class DBServerArray {
         return this.ServerID;
     }
 
-    public long getCommandTimeout() {
+    public int getCommandTimeout() {
         return this.CommandTimeout;
     }
 

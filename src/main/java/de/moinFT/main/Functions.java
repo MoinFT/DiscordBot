@@ -1,5 +1,6 @@
 package de.moinFT.main;
 
+import de.moinFT.utils.BotRoleType;
 import de.moinFT.utils.Privates;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -9,9 +10,10 @@ import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.entity.user.UserStatus;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.Iterator;
-import java.util.concurrent.ExecutionException;
 
 import static de.moinFT.main.Main.DBServer;
 import static de.moinFT.main.Main.client;
@@ -19,13 +21,21 @@ import static de.moinFT.main.Main.client;
 public class Functions {
     private static final Logger log = LogManager.getLogger(Functions.class.getName());
 
-    public static Message replyMessage(Message message, String messageContent) {
-        try {
-            return message.getChannel().sendMessage(message.getUserAuthor().get().getMentionTag() + messageContent).get();
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
+    public static String createHelpMessage(JSONArray json, int space) {
+        StringBuilder messageContent = new StringBuilder();
+
+        for (int x = 0; x < json.length(); x++) {
+            JSONObject temp = json.getJSONObject(x);
+            messageContent.append("\n");
+
+            String messageCommand = temp.getString("command");
+            String messageHelp = temp.getString("message");
+
+            messageContent.append(messageCommand);
+            messageContent.append(Functions.createSpaces(space - messageCommand.length()));
+            messageContent.append(messageHelp);
         }
-        return null;
+        return messageContent.toString();
     }
 
     public static String createSpaces(int count) {
@@ -264,11 +274,11 @@ public class Functions {
         long roleID = Role.getId();
 
         String roleName = "";
-        String roleType = "";
+        BotRoleType roleType = BotRoleType.UNKNOWN;
 
         if (Role.isEveryoneRole()) {
             roleName = "everyone";
-            roleType = "everyone";
+            roleType = BotRoleType.EVERYONE;
         }
 
         log.info("Add Role to DB: " + roleID);

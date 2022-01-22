@@ -12,12 +12,12 @@ public class MemberLeaveListener implements ServerMemberLeaveListener {
 
     @Override
     public void onServerMemberLeave(ServerMemberLeaveEvent event) {
-        Server Server = event.getServer();
-        long ServerID = Server.getId();
-        User User = event.getUser();
-        long UserID = User.getId();
+        Server server = event.getServer();
+        long serverID = server.getId();
+        User user = event.getUser();
+        long userID = user.getId();
 
-        DatabaseConnection.SQL_Execute("DELETE FROM user WHERE serverID = " + ServerID + " AND userID = " + UserID);
-        DBServer.getServer(ServerID).getUsers().delete(UserID);
+        DatabaseConnection.SQL_Execute("DELETE FROM user WHERE serverID = " + serverID + " AND userID = " + userID);
+        DBServer.getServer(serverID).getUsers().delete(userID);
     }
 }

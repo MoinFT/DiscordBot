@@ -5,7 +5,7 @@ public class DBRoleArray {
     private long ServerID;
     private long RoleID;
     private String RoleName;
-    private String RoleType;
+    private BotRoleType RoleType;
 
     private boolean free;
     private DBRoleArray follower;
@@ -15,13 +15,13 @@ public class DBRoleArray {
         this.ServerID = 0;
         this.RoleID = 0;
         this.RoleName = "";
-        this.RoleType = "";
+        this.RoleType = BotRoleType.UNKNOWN;
 
         this.free = true;
         this.follower = null;
     }
 
-    public void setData(long ServerID, long RoleID, String roleType, String roleName) {
+    public void setData(long ServerID, long RoleID, BotRoleType roleType, String roleName) {
         if (this.free) {
             this.ServerID = ServerID;
             this.RoleID = RoleID;
@@ -49,7 +49,7 @@ public class DBRoleArray {
             } else {
                 this.ServerID = 0;
                 this.RoleID = 0;
-                this.RoleType = "";
+                this.RoleType = BotRoleType.UNKNOWN;
                 this.RoleName = "";
 
                 this.free = true;
@@ -97,12 +97,32 @@ public class DBRoleArray {
         return this.RoleName;
     }
 
-    public void updateRoleType(String roleType) {
+    public void updateRoleType(BotRoleType roleType) {
             this.RoleType = roleType;
     }
 
-    public String getRoleType() {
+    public BotRoleType getRoleType() {
         return this.RoleType;
+    }
+
+    public int countRoleType(BotRoleType roleType) {
+        if (!this.free) {
+            if (this.follower != null) {
+                if (this.RoleType == roleType) {
+                    return 1 + this.follower.count();
+                } else {
+                    return this.follower.count();
+                }
+            } else {
+                if (this.RoleType == roleType) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        } else {
+            return 0;
+        }
     }
 
     public int count() {

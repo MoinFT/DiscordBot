@@ -1,6 +1,9 @@
 package de.moinFT.main;
 
+import de.moinFT.utils.BotRoleType;
 import de.moinFT.utils.Privates;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -10,6 +13,7 @@ import java.sql.Statement;
 import static de.moinFT.main.Main.DBServer;
 
 public class DatabaseConnection {
+    private static final Logger log = LogManager.getLogger(DatabaseConnection.class.getName());
 
     private static final String database = "discordBot";
 
@@ -46,7 +50,7 @@ public class DatabaseConnection {
                 res = statement.executeQuery("SELECT * FROM role WHERE serverID = " + serverID);
 
                 while (res.next()) {
-                    DBServer.getServer(i).getRoles().setData(res.getLong("serverID"), res.getLong("roleID"), res.getString("roleType"), res.getString("roleName"));
+                    DBServer.getServer(i).getRoles().setData(res.getLong("serverID"), res.getLong("roleID"), BotRoleType.fromValue(res.getInt("roleType")), res.getString("roleName"));
                 }
             }
 
@@ -65,8 +69,8 @@ public class DatabaseConnection {
             con.close();
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
+            log.error(e.getMessage());
+            log.error("An error occurred. Please try again.");
         }
     }
 
@@ -84,8 +88,8 @@ public class DatabaseConnection {
             con.close();
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("An error occurred. Please try again.");
+            log.error(e.getMessage());
+            log.error("An error occurred. Please try again.");
         }
     }
 }

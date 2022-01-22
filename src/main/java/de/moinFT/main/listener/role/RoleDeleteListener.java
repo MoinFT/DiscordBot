@@ -11,12 +11,12 @@ public class RoleDeleteListener implements org.javacord.api.listener.server.role
 
     @Override
     public void onRoleDelete(RoleDeleteEvent event) {
-        Server Server = event.getServer();
-        long ServerID = Server.getId();
-        Role Role = event.getRole();
-        long RoleID = Role.getId();
+        Server server = event.getServer();
+        long serverID = server.getId();
+        Role role = event.getRole();
+        long roleID = role.getId();
 
-        DatabaseConnection.SQL_Execute("DELETE FROM role WHERE serverID = " + ServerID + " AND roleID = " + RoleID);
-        DBServer.getServer(ServerID).getRoles().delete(RoleID);
+        DatabaseConnection.SQL_Execute("DELETE FROM role WHERE serverID = " + serverID + " AND roleID = " + roleID);
+        DBServer.getServer(serverID).getRoles().delete(roleID);
     }
 }

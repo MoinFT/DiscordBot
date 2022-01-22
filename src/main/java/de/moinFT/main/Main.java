@@ -10,35 +10,43 @@ import de.moinFT.main.listener.member.RoleAddListener;
 import de.moinFT.main.listener.member.RoleRemoveListener;
 import de.moinFT.main.listener.message.ComponentListener;
 import de.moinFT.main.listener.message.MessageListener;
+import de.moinFT.main.listener.role.RoleChangePermissionListener;
 import de.moinFT.main.listener.role.RoleCreateListener;
 import de.moinFT.main.listener.role.RoleDeleteListener;
 import de.moinFT.main.listener.message.SlashCommandListener;
 import de.moinFT.utils.DBServerArray;
 import de.moinFT.utils.Privates;
-import de.moinFT.utils.ServerUserRequest;
+import de.moinFT.utils.CommandRequestArray;
 import org.apache.logging.log4j.*;
 import org.javacord.api.DiscordApi;
 import org.javacord.api.DiscordApiBuilder;
 import org.javacord.api.entity.activity.ActivityType;
+import org.javacord.api.interaction.SlashCommand;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Main {
     private static final Logger log = LogManager.getLogger(Main.class.getName());
 
     public static DBServerArray DBServer;
-    public static ServerUserRequest ServerUserRequest;
+    public static CommandRequestArray CommandRequestArray;
     public static DiscordApi client;
 
+    public static final List<SlashCommand> AdminSlashCommands = new ArrayList<>();
+    public static final List<SlashCommand> BotPermissionSlashCommands = new ArrayList<>();
+
     public static void main(String[] args) {
-        /*try {
+        try {
             Thread.sleep(20000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }*/
+        }
 
         DBServer = new DBServerArray();
         DatabaseConnection.DBGetAllData();
 
-        ServerUserRequest = new ServerUserRequest();
+        CommandRequestArray = new CommandRequestArray();
 
         client = new DiscordApiBuilder()
                 .setToken(Privates.botToken)
@@ -47,9 +55,8 @@ public class Main {
                 .join();
 
         log.info("Bot logged in as: " + client.getYourself().getDiscriminatedName());
-        //log.info("Invite the Bot using following Link: " + client.createBotInvite(Permissions.fromBitmask(2147479295)));
 
-        client.updateActivity(ActivityType.LISTENING, "!help");
+        client.updateActivity(ActivityType.LISTENING, "/help");
 
         Functions.compareDBServer_WithServer();
 
@@ -66,6 +73,7 @@ public class Main {
         client.addServerMemberLeaveListener(new MemberLeaveListener());
 
         client.addRoleCreateListener(new RoleCreateListener());
+        client.addRoleChangePermissionsListener(new RoleChangePermissionListener());
         client.addRoleDeleteListener(new RoleDeleteListener());
 
         client.addServerChannelCreateListener(new ChannelCreateListener());

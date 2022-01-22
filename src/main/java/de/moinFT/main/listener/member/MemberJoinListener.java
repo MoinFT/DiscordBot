@@ -1,6 +1,7 @@
 package de.moinFT.main.listener.member;
 
 import de.moinFT.main.Functions;
+import de.moinFT.utils.BotRoleType;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
@@ -13,22 +14,22 @@ public class MemberJoinListener implements ServerMemberJoinListener {
 
     @Override
     public void onServerMemberJoin(ServerMemberJoinEvent event) {
-        Server Server = event.getServer();
-        long ServerID = Server.getId();
-        User User = event.getUser();
+        Server server = event.getServer();
+        long serverID = server.getId();
+        User user = event.getUser();
 
-        if (!User.isBot()) {
-            int DBRoleCount = DBServer.getServer(ServerID).getRoles().count();
+        if (!user.isBot()) {
+            int DBRoleCount = DBServer.getServer(serverID).getRoles().count();
 
             for (int i = 0; i < DBRoleCount; i++) {
-                if (DBServer.getServer(ServerID).getRoles().getRole(i).getRoleType().equalsIgnoreCase("user")) {
-                    Role role = Server.getRoleById(DBServer.getServer(ServerID).getRoles().getRole(i).getRoleID()).get();
+                if (DBServer.getServer(serverID).getRoles().getRole(i).getRoleType() == BotRoleType.USER) {
+                    Role role = server.getRoleById(DBServer.getServer(serverID).getRoles().getRole(i).getRoleID()).get();
 
-                    User.addRole(role);
+                    user.addRole(role);
                 }
             }
         }
 
-        Functions.addUserToDB(ServerID, User);
+        Functions.addUserToDB(serverID, user);
     }
 }

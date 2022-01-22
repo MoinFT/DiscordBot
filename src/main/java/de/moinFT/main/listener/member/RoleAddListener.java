@@ -16,21 +16,21 @@ public class RoleAddListener implements UserRoleAddListener {
 
     @Override
     public void onUserRoleAdd(UserRoleAddEvent event) {
-        Server Server = event.getServer();
-        long ServerID = Server.getId();
-        User User = event.getUser();
-        long UserID = User.getId();
+        Server server = event.getServer();
+        long serverID = server.getId();
+        User user = event.getUser();
+        long userID = user.getId();
 
-        if (Server.isAdmin(User)) {
-            DBServer.getServer(ServerID).getUsers().getUser(UserID).updateBotPermission(true);
-            DBServer.getServer(ServerID).getUsers().getUser(UserID).updateIsAdmin(true);
-            DatabaseConnection.SQL_Execute("UPDATE user SET botPermission = 'true', isAdmin = 'true' WHERE serverID = '" + ServerID + "' AND userID = '" + UserID + "'");
+        if (server.isAdmin(user)) {
+            DBServer.getServer(serverID).getUsers().getUser(userID).updateBotPermission(true);
+            DBServer.getServer(serverID).getUsers().getUser(userID).updateIsAdmin(true);
+            DatabaseConnection.SQL_Execute("UPDATE user SET botPermission = 'true', isAdmin = 'true' WHERE serverID = '" + serverID + "' AND userID = '" + userID + "'");
 
-            int adminChannelID = DBServer.getServer(Server.getId()).getChannels().getChannel("admin").getID();
+            int adminChannelID = DBServer.getServer(server.getId()).getChannels().getChannel("admin").getID();
 
             if (adminChannelID != -1) {
-                ServerChannel adminChannel = Server.getChannelById(DBServer.getServer(ServerID).getChannels().getChannel(adminChannelID).getChannelID()).get();
-                new ServerChannelUpdater(adminChannel).addPermissionOverwrite(User, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                ServerChannel adminChannel = server.getChannelById(DBServer.getServer(serverID).getChannels().getChannel(adminChannelID).getChannelID()).get();
+                new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
             }
         }
     }
