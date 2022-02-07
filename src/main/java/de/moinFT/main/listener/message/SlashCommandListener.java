@@ -14,7 +14,6 @@ import org.javacord.api.entity.channel.ServerVoiceChannel;
 import org.javacord.api.entity.channel.TextChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.MessageSet;
 import org.javacord.api.entity.message.component.ActionRow;
 import org.javacord.api.entity.message.component.Button;
@@ -24,6 +23,7 @@ import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.SlashCommandCreateEvent;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.listener.interaction.SlashCommandCreateListener;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,7 +52,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
             serverID = server.getId();
         } else {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("FEHLER: Server wurde nicht gefunden!")
                     .respond();
             return;
@@ -61,11 +61,11 @@ public class SlashCommandListener implements SlashCommandCreateListener {
         String logInfos = "Server: " + server.getName() + " (" + server.getId() + ") | User: " + slashCommandInteraction.getUser().getDiscriminatedName() + " (" + slashCommandInteraction.getUser().getId() + ")\n";
 
         if (slashCommandInteraction.getCommandName().equals("bot-permission")) {
-            if (slashCommandInteraction.getFirstOption().isPresent()) {
-                firstOption = slashCommandInteraction.getFirstOption().get();
+            if (slashCommandInteraction.getOptionByIndex(0).isPresent()) {
+                firstOption = slashCommandInteraction.getOptionByIndex(0).get();
             } else {
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Der gesendete SlashCommand ist ungültig!")
                         .respond();
 
@@ -125,11 +125,11 @@ public class SlashCommandListener implements SlashCommandCreateListener {
              *   - message clear
              * */
 
-            if (slashCommandInteraction.getFirstOption().isPresent()) {
-                firstOption = slashCommandInteraction.getFirstOption().get();
+            if (slashCommandInteraction.getOptionByIndex(0).isPresent()) {
+                firstOption = slashCommandInteraction.getOptionByIndex(0).get();
             } else {
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Der gesendete SlashCommand ist ungültig!")
                         .respond();
 
@@ -138,30 +138,30 @@ public class SlashCommandListener implements SlashCommandCreateListener {
             }
 
             TextChannel textChannel = slashCommandInteraction.getChannel().get();
-            int messageAmount = firstOption.getOptions().get(0).getIntValue().get();
+            long messageAmount = firstOption.getOptions().get(0).getLongValue().get();
 
             if (messageAmount > 10) {
                 messageAmount = 10;
             }
 
             try {
-                MessageSet messages = textChannel.getMessages(messageAmount).get();
+                MessageSet messages = textChannel.getMessages((int) messageAmount).get();
                 messages.deleteAll();
 
                 if (messages.size() == 1) {
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Es wurde 1 Nachricht gelöscht.")
                             .respond();
                 } else {
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Es wurden " + messages.size() + " Nachrichten gelöscht.")
                             .respond();
                 }
             } catch (InterruptedException | ExecutionException e) {
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Die Nachrichten konnten nicht gelöscht werden. (Berechtigungen prüfen)")
                         .respond();
 
@@ -196,14 +196,14 @@ public class SlashCommandListener implements SlashCommandCreateListener {
                     }
 
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Dein Name hat jetzt die Farbe: " + roleName)
                             .respond();
 
                     log.info(logInfos + "\t\t\tCommand: color (" + roleName + ")");
                 } else {
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Dein Name hat jetzt keine Farbe.")
                             .respond();
 
@@ -212,7 +212,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
             }
         } else if (slashCommandInteraction.getCommandName().equals("corona")) {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("Aktueller Inzidenzwert für Nienburg (Weser): " + RKICorona.incidenceValue() + "\n(Stand: " + RKICorona.dateOfIncidenceValue() + ")")
                     .respond();
 
@@ -227,7 +227,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
                 voiceChannel = slashCommandInteraction.getUser().getConnectedVoiceChannel(server).get();
             } catch (Exception e) {
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Du musst in einen Sprachkanal sein!")
                         .respond();
 
@@ -246,7 +246,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
                         user.mute(server);
                     }
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Alle Nutzer gestummt")
                             .respond();
                 } else {
@@ -256,7 +256,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
                         user.unmute(server);
                     }
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Alle Nutzer entstummt")
                             .respond();
                 }
@@ -265,7 +265,7 @@ public class SlashCommandListener implements SlashCommandCreateListener {
                 DatabaseConnection.SQL_Execute("UPDATE server SET commandTimeoutTimestamp = '" + timestamp + "' WHERE serverID = '" + serverID + "'");
             } else {
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Der Befehl hat einen Timeout von " + commandTimeout / 1000 + " Sekunden!")
                         .respond();
             }
@@ -298,14 +298,14 @@ public class SlashCommandListener implements SlashCommandCreateListener {
             }
 
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent(message.getStringBuilder().toString())
                     .respond();
 
             log.info(logInfos + "\t\t\tCommand: help");
         } else if (slashCommandInteraction.getCommandName().equals("ping")) {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("Ping!")
                     .respond();
 

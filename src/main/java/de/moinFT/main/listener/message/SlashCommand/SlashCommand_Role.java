@@ -2,12 +2,12 @@ package de.moinFT.main.listener.message.SlashCommand;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 
 import static de.moinFT.main.Functions.getUserHighestRole;
 
@@ -18,11 +18,12 @@ public class SlashCommand_Role {
         SlashCommandInteractionOption firstOption;
         String logInfos = "Server: " + server.getName() + " (" + server.getId() + ") | User: " + slashCommandInteraction.getUser().getDiscriminatedName() + " (" + slashCommandInteraction.getUser().getId() + ")\n";
 
-        if (slashCommandInteraction.getFirstOption().isPresent()) {
-            firstOption = slashCommandInteraction.getFirstOption().get();
+        if (slashCommandInteraction.getOptionByIndex(0).isPresent()) {
+            firstOption = slashCommandInteraction.getOptionByIndex(0).get();
+            System.out.println(firstOption.getName());
         } else {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("Der gesendete SlashCommand ist ungültig!")
                     .respond();
 
@@ -47,7 +48,7 @@ public class SlashCommand_Role {
                         log.info(logInfos + "\t\t\tCommand: role add | Role: " + role.getName() + " (" + role.getId() + ") | User: " + user.getDiscriminatedName() + " (" + user.getId() + ")");
                     } else {
                         slashCommandInteraction.createImmediateResponder()
-                                .setFlags(MessageFlag.EPHEMERAL)
+                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                                 .setContent("Rolle konnte nicht hinzugefügt werden. Nutzer besitzt diese Rolle schon.")
                                 .respond();
 
@@ -55,7 +56,7 @@ public class SlashCommand_Role {
                     }
                 } else {
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Du kannst keine Rolle vergeben die mehr Rechte hat als du!")
                             .respond();
 
@@ -74,7 +75,7 @@ public class SlashCommand_Role {
                         log.info(logInfos + "\t\t\tCommand: role remove | Role: " + role.getName() + " (" + role.getId() + ") | User: " + user.getDiscriminatedName() + " (" + user.getId() + ")");
                     } else {
                         slashCommandInteraction.createImmediateResponder()
-                                .setFlags(MessageFlag.EPHEMERAL)
+                                .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                                 .setContent("Rolle konnte nicht entfernt werden. Nutzer besitzt diese Rolle nicht.")
                                 .respond();
 
@@ -82,7 +83,7 @@ public class SlashCommand_Role {
                     }
                 } else {
                     slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
+                            .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                             .setContent("Du kannst keine Rolle entfernen die mehr Rechte hat als du!")
                             .respond();
 

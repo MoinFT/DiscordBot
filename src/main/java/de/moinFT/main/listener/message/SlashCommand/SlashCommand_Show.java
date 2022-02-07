@@ -9,13 +9,13 @@ import org.javacord.api.entity.channel.ChannelType;
 import org.javacord.api.entity.channel.ServerChannel;
 import org.javacord.api.entity.message.MessageBuilder;
 import org.javacord.api.entity.message.MessageDecoration;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.message.embed.EmbedBuilder;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -31,11 +31,11 @@ public class SlashCommand_Show {
         SlashCommandInteractionOption firstOption;
         String logInfos = "Server: " + server.getName() + " (" + server.getId() + ") | User: " + slashCommandInteraction.getUser().getDiscriminatedName() + " (" + slashCommandInteraction.getUser().getId() + ")\n";
 
-        if (slashCommandInteraction.getFirstOption().isPresent()) {
-            firstOption = slashCommandInteraction.getFirstOption().get();
+        if (slashCommandInteraction.getOptionByIndex(0).isPresent()) {
+            firstOption = slashCommandInteraction.getOptionByIndex(0).get();
         } else {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("Der gesendete SlashCommand ist ungültig!")
                     .respond();
 
@@ -98,9 +98,9 @@ public class SlashCommand_Show {
             break;
             //Displays all users with their nickname and highest role and bot-permission
             case "users": {
-                int pageNumber;
+                long pageNumber;
                 if (!firstOption.getOptions().isEmpty()) {
-                    pageNumber = firstOption.getOptions().get(0).getIntValue().get();
+                    pageNumber = firstOption.getOptions().get(0).getLongValue().get();
                 } else {
                     pageNumber = 1;
                 }
@@ -130,7 +130,7 @@ public class SlashCommand_Show {
                     pages++;
                 }
 
-                int userStartIndex = (pageNumber - 1) * 16;
+                long userStartIndex = (pageNumber - 1) * 16;
 
                 messageContent = new StringBuilder();
                 int count = 0;
@@ -214,7 +214,7 @@ public class SlashCommand_Show {
                         .addInlineField("Bot-Berechtigungen", botPermission);
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .addEmbed(embed)
                         .respond();
 
@@ -271,7 +271,7 @@ public class SlashCommand_Show {
                 message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent(message.getStringBuilder().toString())
                         .respond();
 
@@ -279,18 +279,6 @@ public class SlashCommand_Show {
             }
             break;
             case "roles": {
-                if (slashCommandInteraction.getFirstOption().isPresent()) {
-                    firstOption = slashCommandInteraction.getFirstOption().get();
-                } else {
-                    slashCommandInteraction.createImmediateResponder()
-                            .setFlags(MessageFlag.EPHEMERAL)
-                            .setContent("Der gesendete SlashCommand ist ungültig!")
-                            .respond();
-
-                    log.error("SlashCommand was send without secondOption.");
-                    return;
-                }
-
                 MessageBuilder message = new MessageBuilder();
                 message.append("Role-Setup", MessageDecoration.CODE_LONG);
 
@@ -306,7 +294,17 @@ public class SlashCommand_Show {
                 message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
                 messageContent = new StringBuilder();
 
-                switch (firstOption.getOptions().get(0).getIntValue().get()) {
+                String tempLongValue = firstOption.getOptions().get(0).getLongValue().get().toString();
+                int roleTypeIndex;
+
+                try {
+                    roleTypeIndex = Integer.parseInt(tempLongValue);
+                } catch (Exception e) {
+                    log.warn("Failed: Parse roleTypeIndex from Long to Integer" + e.getMessage());
+                    return;
+                }
+
+                switch (roleTypeIndex) {
                     case 1: {
                         while (roles.hasNext()) {
                             Role role = roles.next();
@@ -385,7 +383,7 @@ public class SlashCommand_Show {
                 message.append(messageContent.toString(), MessageDecoration.CODE_LONG);
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent(message.getStringBuilder().toString())
                         .respond();
             }

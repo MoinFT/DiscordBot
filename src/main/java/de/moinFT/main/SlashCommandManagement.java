@@ -50,7 +50,7 @@ public class SlashCommandManagement {
                                 List.of(
                                         SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "clear", "Löscht Nachrichten.",
                                                 List.of(
-                                                        SlashCommandOption.create(SlashCommandOptionType.INTEGER, "NUMBER", "Anzahl der Nachrichten die gelöscht werden sollen.", true)
+                                                        SlashCommandOption.create(SlashCommandOptionType.LONG, "NUMBER", "Anzahl der Nachrichten die gelöscht werden sollen.", true)
                                                 )
                                         )
                                 )
@@ -87,7 +87,7 @@ public class SlashCommandManagement {
                                 List.of(
                                         SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "command-timeout", "Setzt die Timeout Zeit, welche für einige Befehle genutzt wird.",
                                                 List.of(
-                                                        SlashCommandOption.create(SlashCommandOptionType.INTEGER, "COMMAND-TIMEOUT", "Timeout Zeit in Sekunden.", true)
+                                                        SlashCommandOption.create(SlashCommandOptionType.LONG, "COMMAND-TIMEOUT", "Timeout Zeit in Sekunden.", true)
                                                 )
                                         ),
                                         SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "channel", "Fügt einem Channel einen Namen hinzu.",
@@ -100,7 +100,7 @@ public class SlashCommandManagement {
                                                 List.of(
                                                         SlashCommandOption.create(SlashCommandOptionType.ROLE, "ROLE", "Rolle die Namen und Typ erhalten soll.", true),
                                                         SlashCommandOption.create(SlashCommandOptionType.STRING, "ROLE-NAME", "Name der gesetzt werden soll.", true),
-                                                        SlashCommandOption.createWithChoices(SlashCommandOptionType.INTEGER, "ROLE-TYPE", "Typ der gesetzt werden soll.", true,
+                                                        SlashCommandOption.createWithChoices(SlashCommandOptionType.LONG, "ROLE-TYPE", "Typ der gesetzt werden soll.", true,
                                                                 Arrays.asList(
                                                                         SlashCommandOptionChoice.create("color", 1),
                                                                         SlashCommandOptionChoice.create("user", 2)
@@ -125,7 +125,7 @@ public class SlashCommandManagement {
                                 SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "bot-permission", " Gibt alle Nutzer mit Bot-Berechtigungen aus."),
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "users", "Gibt Auskunft über alle Nutzer.",
                                         List.of(
-                                                SlashCommandOption.create(SlashCommandOptionType.INTEGER, "PAGE", "Seite der Nutzer-Informationen. (16 Nutzer pro Seite)", false)
+                                                SlashCommandOption.create(SlashCommandOptionType.LONG, "PAGE", "Seite der Nutzer-Informationen. (16 Nutzer pro Seite)", false)
                                         )
                                 ),
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "user", "Gibt Auskunft über einen Nutzer.",
@@ -136,7 +136,7 @@ public class SlashCommandManagement {
                                 SlashCommandOption.create(SlashCommandOptionType.SUB_COMMAND, "channels", "Gibt Auskunft über dem Bot zugewiesene Kanäle."),
                                 SlashCommandOption.createWithOptions(SlashCommandOptionType.SUB_COMMAND, "roles", "Gibt Auskunft über dem Bot zugewiesene Rollen.",
                                         List.of(
-                                                SlashCommandOption.createWithChoices(SlashCommandOptionType.INTEGER, "roles", "Gibt Auskunft über dem Bot zugewiesene Rollen.", true,
+                                                SlashCommandOption.createWithChoices(SlashCommandOptionType.LONG, "roles", "Gibt Auskunft über dem Bot zugewiesene Rollen.", true,
                                                         Arrays.asList(
                                                                 SlashCommandOptionChoice.create("all", 1),
                                                                 SlashCommandOptionChoice.create("color", 2),
@@ -186,28 +186,28 @@ public class SlashCommandManagement {
 
         for (SlashCommand slashCommand : AdminSlashCommands) {
             for (int iServer = 0; iServer < DBServer.count(); iServer++) {
-                List<SlashCommandPermissions> slashCommandPermissions = new ArrayList<>();
+                List<ApplicationCommandPermissions> slashCommandPermissions = new ArrayList<>();
 
                 for (int iRole = 0; iRole < DBServer.getServer(iServer).getRoles().count(); iRole++) {
                     if (client.getServerById(DBServer.getServer(iServer).getServerID()).get().getRoleById(DBServer.getServer(iServer).getRoles().getRole(iRole).getRoleID()).get().getPermissions().getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
-                        slashCommandPermissions.add(SlashCommandPermissions.create(DBServer.getServer(iServer).getRoles().getRole(iRole).getRoleID(), SlashCommandPermissionType.ROLE, true));
+                        slashCommandPermissions.add(ApplicationCommandPermissions.create(DBServer.getServer(iServer).getRoles().getRole(iRole).getRoleID(), ApplicationCommandPermissionType.ROLE, true));
                     }
                 }
-                new SlashCommandPermissionsUpdater(client.getServerById(DBServer.getServer(iServer).getServerID()).get()).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
+                new ApplicationCommandPermissionsUpdater(client.getServerById(DBServer.getServer(iServer).getServerID()).get()).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
             }
         }
 
         for (SlashCommand slashCommand : BotPermissionSlashCommands) {
             for (int iServer = 0; iServer < DBServer.count(); iServer++) {
-                List<SlashCommandPermissions> slashCommandPermissions = new ArrayList<>();
+                List<ApplicationCommandPermissions> slashCommandPermissions = new ArrayList<>();
 
                 for (int iUser = 0; iUser < DBServer.getServer(iServer).getUsers().count(); iUser++) {
                     if (DBServer.getServer(iServer).getUsers().getUser(iUser).getBotPermission()) {
-                        slashCommandPermissions.add(SlashCommandPermissions.create(DBServer.getServer(iServer).getUsers().getUser(iUser).getUserID(), SlashCommandPermissionType.USER, true));
+                        slashCommandPermissions.add(ApplicationCommandPermissions.create(DBServer.getServer(iServer).getUsers().getUser(iUser).getUserID(), ApplicationCommandPermissionType.USER, true));
                     }
                 }
 
-                new SlashCommandPermissionsUpdater(client.getServerById(DBServer.getServer(iServer).getServerID()).get()).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
+                new ApplicationCommandPermissionsUpdater(client.getServerById(DBServer.getServer(iServer).getServerID()).get()).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
             }
         }
 

@@ -5,16 +5,14 @@ import de.moinFT.utils.CommandRequestType;
 import de.moinFT.utils.Privates;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.javacord.api.entity.channel.ServerChannel;
-import org.javacord.api.entity.channel.ServerChannelUpdater;
-import org.javacord.api.entity.message.Message;
-import org.javacord.api.entity.message.MessageFlag;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.entity.user.User;
 import org.javacord.api.event.interaction.MessageComponentCreateEvent;
 import org.javacord.api.interaction.*;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 import org.javacord.api.listener.interaction.MessageComponentCreateListener;
 
 import java.util.ArrayList;
@@ -35,13 +33,17 @@ public class ComponentListener implements MessageComponentCreateListener {
 
         //Get the adminChannel for the permission set if available
         int adminChannelID = DBServer.getServer(serverID).getChannels().getChannel("admin").getID();
-        ServerChannel adminChannel = null;
+        RegularServerChannel adminChannel = null;
 
         if (adminChannelID != -1) {
-            adminChannel = server.getChannelById(DBServer.getServer(serverID).getChannels().getChannel(adminChannelID).getChannelID()).get();
+            adminChannel = server.getChannelById(DBServer.getServer(serverID).getChannels().getChannel(adminChannelID).getChannelID()).get().asRegularServerChannel().get();
         }
 
-        messageComponentInteraction.getMessage().ifPresent(Message::delete);
+        try {
+            messageComponentInteraction.getMessage().delete();
+        } catch (Exception e) {
+            log.warn("Failed to delete message\n" + e.getMessage());
+        }
 
         if (customID.startsWith("botPermission")) {
             User user = CommandRequestArray.getUser(CommandRequestType.BOT_PERMISSION, server);
@@ -51,7 +53,7 @@ public class ComponentListener implements MessageComponentCreateListener {
                     case "botPermissionAllow":
                         //Permission allow set for the adminChannel if available
                         if (adminChannel != null) {
-                            new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                            adminChannel.createUpdater().addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
                         }
 
                         //Allow the bot-permission in the DB
@@ -64,9 +66,9 @@ public class ComponentListener implements MessageComponentCreateListener {
                                 .respond();
 
                         for (SlashCommand slashCommand : BotPermissionSlashCommands) {
-                            List<SlashCommandPermissions> slashCommandPermissions = new ArrayList<>();
-                            slashCommandPermissions.add(SlashCommandPermissions.create(user.getId(), SlashCommandPermissionType.USER, true));
-                            new SlashCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
+                            List<ApplicationCommandPermissions> slashCommandPermissions = new ArrayList<>();
+                            slashCommandPermissions.add(ApplicationCommandPermissions.create(user.getId(), ApplicationCommandPermissionType.USER, true));
+                            new ApplicationCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
                         }
 
                         log.info("Bot-permission allowed for user: " + user.getDiscriminatedName());
@@ -96,7 +98,7 @@ public class ComponentListener implements MessageComponentCreateListener {
                         } else {
                             //Permission deny set for the adminChannel if available
                             if (adminChannel != null) {
-                                new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setUnset(PermissionType.READ_MESSAGES).build()).update();
+                                adminChannel.createUpdater().addPermissionOverwrite(user, new PermissionsBuilder().setUnset(PermissionType.READ_MESSAGES).build()).update();
                             }
 
                             //Deny the bot-permission in the DB
@@ -109,9 +111,9 @@ public class ComponentListener implements MessageComponentCreateListener {
                                     .respond();
 
                             for (SlashCommand slashCommand : BotPermissionSlashCommands) {
-                                List<SlashCommandPermissions> slashCommandPermissions = new ArrayList<>();
-                                slashCommandPermissions.add(SlashCommandPermissions.create(user.getId(), SlashCommandPermissionType.USER, false));
-                                new SlashCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
+                                List<ApplicationCommandPermissions> slashCommandPermissions = new ArrayList<>();
+                                slashCommandPermissions.add(ApplicationCommandPermissions.create(user.getId(), ApplicationCommandPermissionType.USER, false));
+                                new ApplicationCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
                             }
 
                             log.info("Bot-permission denied for user: " + user.getDiscriminatedName());
@@ -121,7 +123,7 @@ public class ComponentListener implements MessageComponentCreateListener {
             } else {
                 //Send respond on the request
                 messageComponentInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Zeit ist abgelaufen! (Mehr als zwei Minuten vergangen)")
                         .respond();
             }

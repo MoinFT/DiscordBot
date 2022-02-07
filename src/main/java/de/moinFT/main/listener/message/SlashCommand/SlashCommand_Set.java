@@ -7,11 +7,11 @@ import de.moinFT.utils.DBRoleArray;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.javacord.api.entity.channel.Channel;
-import org.javacord.api.entity.message.MessageFlag;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.interaction.SlashCommandInteraction;
 import org.javacord.api.interaction.SlashCommandInteractionOption;
+import org.javacord.api.interaction.callback.InteractionCallbackDataFlag;
 
 import static de.moinFT.main.Main.DBServer;
 
@@ -23,11 +23,11 @@ public class SlashCommand_Set {
         SlashCommandInteractionOption firstOption;
         String logInfos = "Server: " + server.getName() + " (" + server.getId() + ") | User: " + slashCommandInteraction.getUser().getDiscriminatedName() + " (" + slashCommandInteraction.getUser().getId() + ")\n";
 
-        if (slashCommandInteraction.getFirstOption().isPresent()) {
-            firstOption = slashCommandInteraction.getFirstOption().get();
+        if (slashCommandInteraction.getOptionByIndex(0).isPresent()) {
+            firstOption = slashCommandInteraction.getOptionByIndex(0).get();
         } else {
             slashCommandInteraction.createImmediateResponder()
-                    .setFlags(MessageFlag.EPHEMERAL)
+                    .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                     .setContent("Der gesendete SlashCommand ist ungültig!")
                     .respond();
 
@@ -37,13 +37,13 @@ public class SlashCommand_Set {
 
         switch (firstOption.getName()) {
             case "command-timeout": {
-                int commandTimeout = firstOption.getOptions().get(0).getIntValue().get() * 1000;
+                long commandTimeout = firstOption.getOptions().get(0).getLongValue().get() * 1000;
 
                 DBServer.getServer(serverID).updateCommandTimeout(commandTimeout);
                 DatabaseConnection.SQL_Execute("UPDATE server SET commandTimeout = '" + commandTimeout + "' WHERE serverID = '" + serverID + "'");
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Command-Timeout wurde erfolgreich gesetzt.")
                         .respond();
 
@@ -57,7 +57,7 @@ public class SlashCommand_Set {
                 DatabaseConnection.SQL_Execute("UPDATE server SET musicBotPrefix = '" + prefix + "' WHERE serverID = '" + serverID + "'");
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Neuer Prefix wurde efolgreich gesetzt.")
                         .respond();
 
@@ -85,7 +85,7 @@ public class SlashCommand_Set {
                 DatabaseConnection.SQL_Execute("UPDATE channel SET channelName = '" + channelName + "' WHERE serverID = '" + serverID + "' AND channelID = '" + channel.getId() + "'");
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Channel Name wurde erfolgreich gesetzt.")
                         .respond();
 
@@ -126,7 +126,7 @@ public class SlashCommand_Set {
                 DatabaseConnection.SQL_Execute("UPDATE role SET roleType = '" + roleType + "', roleName = '" + roleName + "' WHERE serverID = '" + serverID + "' AND roleID = '" + role.getId() + "'");
 
                 slashCommandInteraction.createImmediateResponder()
-                        .setFlags(MessageFlag.EPHEMERAL)
+                        .setFlags(InteractionCallbackDataFlag.EPHEMERAL)
                         .setContent("Rollen Name und Typ wurden erfolgreich gesetzt.")
                         .respond();
 

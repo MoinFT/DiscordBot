@@ -1,8 +1,7 @@
 package de.moinFT.main.listener.member;
 
 import de.moinFT.main.DatabaseConnection;
-import org.javacord.api.entity.channel.ServerChannel;
-import org.javacord.api.entity.channel.ServerChannelUpdater;
+import org.javacord.api.entity.channel.RegularServerChannel;
 import org.javacord.api.entity.permission.PermissionType;
 import org.javacord.api.entity.permission.PermissionsBuilder;
 import org.javacord.api.entity.server.Server;
@@ -29,8 +28,8 @@ public class RoleAddListener implements UserRoleAddListener {
             int adminChannelID = DBServer.getServer(server.getId()).getChannels().getChannel("admin").getID();
 
             if (adminChannelID != -1) {
-                ServerChannel adminChannel = server.getChannelById(DBServer.getServer(serverID).getChannels().getChannel(adminChannelID).getChannelID()).get();
-                new ServerChannelUpdater(adminChannel).addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
+                RegularServerChannel adminChannel = server.getChannelById(DBServer.getServer(serverID).getChannels().getChannel(adminChannelID).getChannelID()).get().asRegularServerChannel().get();
+                adminChannel.createUpdater().addPermissionOverwrite(user, new PermissionsBuilder().setAllowed(PermissionType.READ_MESSAGES).build()).update();
             }
         }
     }

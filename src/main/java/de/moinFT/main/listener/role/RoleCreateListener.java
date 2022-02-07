@@ -7,10 +7,10 @@ import org.javacord.api.entity.permission.Permissions;
 import org.javacord.api.entity.permission.Role;
 import org.javacord.api.entity.server.Server;
 import org.javacord.api.event.server.role.RoleCreateEvent;
+import org.javacord.api.interaction.ApplicationCommandPermissionType;
+import org.javacord.api.interaction.ApplicationCommandPermissions;
+import org.javacord.api.interaction.ApplicationCommandPermissionsUpdater;
 import org.javacord.api.interaction.SlashCommand;
-import org.javacord.api.interaction.SlashCommandPermissionType;
-import org.javacord.api.interaction.SlashCommandPermissions;
-import org.javacord.api.interaction.SlashCommandPermissionsUpdater;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ public class RoleCreateListener implements org.javacord.api.listener.server.role
 
         if (permission.getState(PermissionType.ADMINISTRATOR) == PermissionState.ALLOWED) {
             for (SlashCommand slashCommand : AdminSlashCommands) {
-                List<SlashCommandPermissions> slashCommandPermissions = new ArrayList<>();
+                List<ApplicationCommandPermissions> slashCommandPermissions = new ArrayList<>();
 
-                slashCommandPermissions.add(SlashCommandPermissions.create(role.getId(), SlashCommandPermissionType.ROLE, true));
-                new SlashCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
+                slashCommandPermissions.add(ApplicationCommandPermissions.create(role.getId(), ApplicationCommandPermissionType.ROLE, true));
+                new ApplicationCommandPermissionsUpdater(server).setPermissions(slashCommandPermissions).update(slashCommand.getId()).join();
             }
         }
     }

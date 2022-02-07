@@ -4,7 +4,7 @@ public class DBServerArray {
     private int ID;
     private long ServerID;
     private long CommandTimeoutTimestamp;
-    private int CommandTimeout;
+    private long CommandTimeout;
     private String Prefix;
     private String MusicBotPrefix;
     private DBUserArray Users;
@@ -108,11 +108,11 @@ public class DBServerArray {
         return this.ServerID;
     }
 
-    public int getCommandTimeout() {
+    public long getCommandTimeout() {
         return this.CommandTimeout;
     }
 
-    public void updateCommandTimeout(int CommandTimeout) {
+    public void updateCommandTimeout(long CommandTimeout) {
         this.CommandTimeout = CommandTimeout;
     }
 
